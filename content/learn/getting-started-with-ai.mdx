@@ -1,0 +1,34 @@
+---
+title: Your first AI call in AL
+description: "From SecretText to GenerateText: a short walkthrough with structured output."
+---
+
+This tutorial gets you from zero to a validated JSON response using AI Open SDK.
+
+## 1. Add the dependencies
+
+Reference **AI Open SDK** (core) and a provider extension such as **AI Open SDK Anthropic** from [GuillemPM/AL-AI-Toolkit](https://github.com/GuillemPM/AL-AI-Toolkit). Compile against Business Central Application 28.x.
+
+See [Providers](/docs/providers) for the full packaging model.
+
+## 2. Store the API key as SecretText
+
+Load keys from Isolated Storage or a setup table into `SecretText` so the debugger never shows them.
+
+## 3. Call the model
+
+<include lang="al" meta='title="CallModel.al"'>samples/getting-started-with-ai/CallModel.al</include>
+
+## 4. Add structured output
+
+<include lang="al" meta='title="StructuredOutput.al"'>samples/getting-started-with-ai/StructuredOutput.al</include>
+
+## 5. Test with Mock
+
+Use `"AIOS Mock"` from Core in your test app so CI never needs live keys. See [Mock](/docs/concepts/mock).
+
+## Next
+
+- [Tools](/docs/concepts/tools) for multi-step agents
+- [Providers](/docs/providers) for Anthropic, OpenAI, OpenCode Zen, Compatible, and Mock
+- [Changelog](/learn/changelog) for what shipped in v0.1

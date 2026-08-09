@@ -1,0 +1,22 @@
+---
+title: AIOS Generate Result
+description: Accessors for text generation results.
+---
+
+Key accessors on `"AIOS Generate Result"`:
+
+| Method | Purpose |
+|---|---|
+| `Output()` | Final text or validated JSON |
+| `Body()` | Raw response body |
+| `Headers()` | Response headers |
+| `HttpStatusCode()` | HTTP status |
+| `HasToolCalls()` / `GetToolCalls()` | Tool calls on the last model response |
+| `StoppedAtStepLimit()` | `true` when the tool loop reached `MaxSteps` with pending tool calls |
+| `GetResponseCalls()` | Every model HTTP call in the run |
+| `GetStepCount()` | Number of model HTTP calls |
+| `GetTotalInputTokens()` / `GetTotalOutputTokens()` | Aggregated usage across steps |
+
+Token, finish-reason, provider, and warning helpers are also available for observability.
+
+See [Tools](/docs/concepts/tools) for multi-step behavior.

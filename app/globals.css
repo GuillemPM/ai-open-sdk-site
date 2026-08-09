@@ -1,0 +1,168 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/black.css';
+@import 'fumadocs-ui/css/preset.css';
+
+@source '../node_modules/fumadocs-ui/dist/**/*.js';
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+@keyframes aios-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes aios-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes aios-code-shine {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: -20% 0;
+  }
+}
+
+.aios-fade-up {
+  animation: aios-fade-up 0.7s ease-out both;
+}
+
+.aios-fade-up-delay {
+  animation: aios-fade-up 0.7s ease-out 0.12s both;
+}
+
+.aios-fade-up-delay-2 {
+  animation: aios-fade-up 0.7s ease-out 0.24s both;
+}
+
+.aios-magic-move-code {
+  margin: 0;
+  background: transparent !important;
+  color: var(--color-fd-card-foreground);
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 12px;
+  line-height: 1.5rem;
+  tab-size: 4;
+}
+
+@media (min-width: 640px) {
+  .aios-magic-move-code {
+    font-size: 13px;
+  }
+}
+
+.aios-magic-move .shiki-magic-move-line-number {
+  color: var(--color-fd-muted-foreground);
+  opacity: 0.55;
+  min-width: 1.5rem;
+  padding-right: 0.75rem;
+  text-align: right;
+}
+
+/* Hero frame atmosphere: mesh + grain inside a rounded container */
+.aios-hero-frame {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  border: 1px solid var(--color-fd-border);
+  border-radius: 1rem;
+  background: color-mix(in oklab, var(--color-fd-background) 82%, var(--color-fd-foreground) 5%);
+  box-shadow:
+    0 1px 0 color-mix(in oklab, var(--color-fd-foreground) 4%, transparent),
+    0 24px 48px -32px rgba(0, 0, 0, 0.35);
+}
+
+.aios-atmosphere {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.aios-mesh {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -5%, rgba(0, 0, 0, 0.09), transparent 60%),
+    radial-gradient(ellipse 45% 40% at 8% 35%, rgba(0, 0, 0, 0.055), transparent 55%),
+    radial-gradient(ellipse 42% 38% at 92% 30%, rgba(0, 0, 0, 0.05), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 50% 75%, rgba(0, 0, 0, 0.035), transparent 65%);
+}
+
+.dark .aios-mesh {
+  background:
+    radial-gradient(ellipse 70% 55% at 50% -5%, rgba(255, 255, 255, 0.12), transparent 60%),
+    radial-gradient(ellipse 45% 40% at 8% 35%, rgba(255, 255, 255, 0.065), transparent 55%),
+    radial-gradient(ellipse 42% 38% at 92% 30%, rgba(255, 255, 255, 0.055), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 50% 75%, rgba(255, 255, 255, 0.04), transparent 65%);
+}
+
+.aios-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+}
+
+.dark .aios-grain {
+  opacity: 0.2;
+  mix-blend-mode: soft-light;
+}
+
+.aios-code-panel {
+  animation: aios-fade-in 0.9s ease-out 0.2s both;
+}
+
+.aios-code-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    110deg,
+    transparent 30%,
+    color-mix(in oklab, var(--color-fd-foreground) 4%, transparent) 45%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: aios-code-shine 2.4s ease-out 0.6s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aios-fade-up,
+  .aios-fade-up-delay,
+  .aios-fade-up-delay-2,
+  .aios-code-panel,
+  .aios-code-panel::before {
+    animation: none;
+  }
+}

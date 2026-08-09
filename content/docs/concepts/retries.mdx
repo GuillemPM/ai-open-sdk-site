@@ -1,0 +1,18 @@
+---
+title: Retries
+description: Shared backoff for rate limits, timeouts, and unavailable providers.
+---
+
+Retries are configured on the request:
+
+- `GetMaxRetries` / `SetMaxRetries` (default **2**)
+
+Retriable errors:
+
+- Rate limit
+- Timeout
+- Provider unavailable
+
+Shared helper: `"AIOS Retry"`, used for both text and image generation.
+
+Tune retries per call when you know a provider is flaky, and keep defaults conservative for interactive UI paths.

@@ -1,0 +1,53 @@
+---
+title: Client API
+description: GenerateText, GenerateImage, results, and lifecycle events.
+---
+
+`"AIOS Client"` is the public entry point.
+
+## Text generation
+
+Overloads:
+
+- `GenerateText(Model, Prompt)`
+- `GenerateText(Model, System, Prompt)`
+- `GenerateText(Model, Request)`: full options via `"AIOS Chat Request"`
+- `GenerateText(Model, Request, OutputRecRef)`: flat RecRef binding
+- `GenerateText(Model, Request, ToolSet, MaxSteps)`: automatic tool loop
+- `GenerateText(Model, Request, ToolSet, MaxSteps, OutputRecRef)`
+
+Returns `"AIOS Generate Result"` and Errors on failure.
+
+### Result accessors
+
+| Method | Meaning |
+|---|---|
+| `Output()`, `Body()`, `Headers()`, `HttpStatusCode()` | Response payload |
+| Token / finish / provider helpers | Observability for the last step |
+| `HasToolCalls()` / `GetToolCalls()` | Tool calls on the last model response |
+| `StoppedAtStepLimit()` | Tool loop reached `MaxSteps` with pending tool calls |
+| `GetResponseCalls()`, `GetStepCount()`, `GetTotalInputTokens()`, `GetTotalOutputTokens()` | Full multi-step run |
+
+## Image generation
+
+- `GenerateImage(Model, Prompt)`
+- `GenerateImage(Model, Request)`
+
+Returns `"AIOS Generate Image Result"` with `GetImages()`, `GetUsage()`, `GetResponseCalls()`.
+
+OpenAI and Mock ship image models today.
+
+## Lifecycle events
+
+Integration events on `"AIOS Client"`:
+
+- `OnBeforeGenerate`
+- `OnBeforeLanguageModelCall`
+- `OnAfterLanguageModelCall`
+- `OnAfterGenerate` (success only)
+
+## Internal try helpers
+
+`TryGenerateText` / `TryGenerate` / `TryGenerateWithTools` / `TryGenerateImage` are internal soft-fail helpers used by this app's tests and demos. Extension code uses the public `Generate*` methods.
+
+See also [API: AIOS Client](/docs/api/client).

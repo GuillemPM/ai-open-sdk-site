@@ -1,0 +1,10 @@
+{
+  "title": "Providers",
+  "pages": [
+    "anthropic",
+    "openai",
+    "opencode-zen",
+    "mock",
+    "custom"
+  ]
+}

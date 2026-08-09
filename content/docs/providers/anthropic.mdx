@@ -1,0 +1,48 @@
+---
+title: Anthropic
+description: Claude models through the AI Open SDK Anthropic extension.
+---
+
+**AI Open SDK Anthropic** is a Business Central app that depends on **AI Open SDK** (core) and exposes the `"AIOS Anthropic"` factory.
+
+| | |
+|---|---|
+| App name | AI Open SDK Anthropic |
+| Factory | `"AIOS Anthropic"` |
+| Provider id | `anthropic` |
+| Text | Yes |
+| Image | No |
+| Default API | `https://api.anthropic.com` |
+| Default `anthropic-version` | `2023-06-01` |
+
+## Dependencies
+
+Your extension depends on:
+
+1. **AI Open SDK** (core)
+2. **AI Open SDK Anthropic**
+
+## Generate text
+
+<include lang="al" meta='title="GenerateText.al"'>samples/anthropic/GenerateText.al</include>
+
+With a system message:
+
+<include lang="al" meta='title="GenerateTextSystem.al"'>samples/anthropic/GenerateTextSystem.al</include>
+
+## Factory API
+
+| Procedure | Behavior |
+|---|---|
+| `Model(ModelId, KeyValue)` | Sets the API key and returns `"AIOS Language Model"` |
+| `Model(ModelId)` | Returns a model using a key previously set with `SetApiKey` |
+| `SetApiKey(KeyValue)` | Stores the Anthropic API key as `SecretText` |
+| `SetApiVersion(Version)` | Overrides the `anthropic-version` header (default `2023-06-01`) |
+| `GetName()` | Returns `anthropic` |
+| `BindLanguageModel(ModelId, BoundModel)` | Soft-bind; returns `false` when model id or key is missing |
+
+`Model` errors when the model id is empty or the API key is missing.
+
+## Keys
+
+Load the key into `SecretText` from Isolated Storage or a setup table. HTTP headers use the SecretText overloads so the debugger does not show the value.

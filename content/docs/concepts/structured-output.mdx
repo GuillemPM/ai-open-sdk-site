@@ -1,0 +1,22 @@
+---
+title: Structured Output
+description: Validate model JSON with AIOS Schema.
+---
+
+Structured output validates the model response against a JSON Schema before you read it.
+
+## Schema to validated JSON
+
+Build a schema with `"AIOS Schema"`, attach it to the request, then read validated JSON from the result:
+
+<include lang="al" meta='title="SchemaOutput.al"'>samples/structured-output/SchemaOutput.al</include>
+
+## Flat RecRef convenience
+
+For binding into a record:
+
+<include lang="al" meta='title="RecRefOutput.al"'>samples/structured-output/RecRefOutput.al</include>
+
+Flat RecRef binding fills record fields from the validated JSON. Use schema-validated JSON when you need a stable contract across versions.
+
+With a tool loop, structured output and RecRef binding run on the final non-tool-call step only.

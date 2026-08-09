@@ -1,0 +1,21 @@
+---
+title: AIOS Client
+description: Public procedures on Codeunit AIOS Client.
+---
+
+Public surface (v0.1, may change before 1.0):
+
+| Procedure | Returns |
+|---|---|
+| `GenerateText(Model, Prompt)` | `"AIOS Generate Result"` |
+| `GenerateText(Model, SystemMessage, Prompt)` | `"AIOS Generate Result"` |
+| `GenerateText(Model, Request)` | `"AIOS Generate Result"` |
+| `GenerateText(Model, Request, OutputRecRef)` | `"AIOS Generate Result"` |
+| `GenerateText(Model, Request, ToolSet, MaxSteps)` | `"AIOS Generate Result"` |
+| `GenerateText(Model, Request, ToolSet, MaxSteps, OutputRecRef)` | `"AIOS Generate Result"` |
+| `GenerateImage(Model, Prompt)` | `"AIOS Generate Image Result"` |
+| `GenerateImage(Model, Request)` | `"AIOS Generate Image Result"` |
+
+Errors on failure. Extension code uses these public procedures; `Try*` helpers stay internal to the toolkit app.
+
+Full concept notes: [Client API](/docs/concepts/client).

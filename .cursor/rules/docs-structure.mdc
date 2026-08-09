@@ -1,0 +1,60 @@
+---
+description: Fumadocs content layout for frontmatter, meta.json, and docs vs learn trees
+globs: content/**/*.{mdx,json}
+alwaysApply: false
+---
+
+# Docs structure
+
+Follow the Vercel AI SDK docs pattern: folders are categories; the folder index is the category page, not a sidebar child.
+
+## Frontmatter
+
+Every MDX page needs:
+
+```yaml
+---
+title: Short title
+description: One promise. What the reader can do after this page.
+---
+```
+
+## Trees
+
+| Tree | Use for |
+|---|---|
+| `content/docs/concepts/` | How the SDK works (client, tools, schema, mock, retries) |
+| `content/docs/providers/` | Provider-specific setup and examples |
+| `content/docs/api/` | Object/API reference |
+| `content/docs/` root | Introduction (`index.mdx`), getting-started |
+| `content/learn/` | Tutorials, narrative guides, changelog |
+
+## Navigation (AI SDK style)
+
+- Nest folders with `"concepts"`, `"providers"`, `"api"` in the parent `pages` array. Do **not** use `"...concepts"` (that **extracts**/flattens children into the parent).
+- Do **not** list `"index"` in a folder's `pages` array. `index.mdx` is the folder index (clickable folder name). Listing it turns it into a duplicate child.
+- Folder `meta.json` `title` and `index.mdx` `title` should match the category (e.g. both `Concepts`).
+- Avoid `---Section---` separators that repeat a folder or page name next to that folder/page.
+- Keep page order teachable: introduction, getting started, then concept/provider/API folders.
+
+```json
+// content/docs/meta.json
+{
+  "pages": ["index", "getting-started", "concepts", "providers", "api"]
+}
+
+// content/docs/concepts/meta.json
+{
+  "title": "Concepts",
+  "pages": ["client", "structured-output", "tools", "mock", "retries"]
+}
+
+// content/docs/concepts/index.mdx
+title: Concepts
+```
+
+Sidebar result: **Introduction**, **Getting Started**, **Concepts** (folder → index) with Client/Tools/… as children. No "Concepts / Concepts".
+
+## Cross-links
+
+Link concepts, API, and providers instead of repeating the same deep explanation on every page.

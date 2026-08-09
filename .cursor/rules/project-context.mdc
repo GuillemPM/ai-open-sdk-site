@@ -1,0 +1,16 @@
+---
+description: Product context, docs-first bias, and repo conventions for AI Open SDK site
+alwaysApply: true
+---
+
+# Project context
+
+This repo is the **AI Open SDK** website (Business Central / AL), not the SDK source.
+
+- Pillars: `/` product, `/docs` reference, `/learn` tutorials
+- Package manager: **pnpm** only
+- **Docs-first**: optimize for professional documentation; touch site code only to support content
+- Never invent AL SDK APIs. Use existing samples or the upstream toolkit.
+- Docs copy must sound human (no em dashes or spaced hyphen asides). See `docs-voice.mdc`.
+- Durable guidance lives in `AGENTS.md` (outside the Next.js auto-block) and `.cursor/rules/`
+- Skills: `write-docs`, `add-doc-page`, `review-docs`

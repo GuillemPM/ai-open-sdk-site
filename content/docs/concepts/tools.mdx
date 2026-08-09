@@ -1,0 +1,158 @@
+---
+title: Tools
+description: Let models call AL procedures through AIOS Tool Set.
+---
+
+Tools are AL procedures the model can invoke during generation. A **tool call** is a request from the model; a **tool result** is the text your procedure returns. The SDK maps both through the provider chat format and keeps them on the conversation.
+
+## Core objects
+
+| Object | Role |
+|---|---|
+| `"AIOS Tool"` | One tool: name, description, JSON Schema input, and `Execute` |
+| `"AIOS Tool Handler"` | Many tools in one codeunit: `GetDefinitions` + `Execute(Name, ...)` |
+| `"AIOS Tool Set"` | Collection you pass into `GenerateText` |
+| `"AIOS Tool Call"` | One model request: id, name, arguments |
+
+Every tool exposes:
+
+- **Name:** stable identifier sent to the provider (for example `echo`)
+- **Description:** text that influences when the model selects the tool
+- **Input schema:** JSON Schema for arguments, usually built with `"AIOS Schema"`
+- **Execute:** runs the tool and writes `ResultText`; returns `true` on success and `false` on failure
+
+## Multi-step generation
+
+Pass a tool set into `GenerateText` with a step budget:
+
+<include lang="al" meta='title="MultiStep.al"'>samples/tools/MultiStep.al</include>
+
+The client:
+
+1. Attaches the tool set to the request
+2. Calls the model
+3. When the response contains tool calls, executes each tool and appends results to the request
+4. Calls the model again
+5. Repeats until the model returns a final answer or `MaxSteps` is reached
+
+`MaxSteps` values below 1 are treated as 1. Each model HTTP call counts as one step.
+
+### Outcomes
+
+| Condition | Result |
+|---|---|
+| Model returns text (no tool calls) | Success; `Output()` is the final answer |
+| Model requests a registered tool | Tool runs; result is appended; loop continues |
+| Model requests an unknown tool name | Generation fails with an invalid-request error |
+| Tool `Execute` returns `false` | `ResultText` is sent back as the tool result; the loop continues |
+| Last step still has tool calls | Success; `HasToolCalls()` and `StoppedAtStepLimit()` are `true`; a warning of type `tool_loop_step_limit` is added |
+
+Structured output and RecRef binding run on the final non-tool-call step only.
+
+Reasoning fields such as `reasoning_content` (for example DeepSeek via OpenCode Zen) are preserved on assistant tool-call turns and echoed on follow-up steps.
+
+## Choose a registration pattern
+
+| Pattern | API | Fit |
+|---|---|---|
+| Interface tool | `ToolSet.Add(Tool)` | Reusable single-tool codeunits |
+| Handler pack | `ToolSet.Use(Handler)` | Several tools behind one object ID |
+| Named + event | `ToolSet.Add(Name, Description, Schema)` | Definitions at the call site; execute via `OnExecuteTool` |
+| Definition object | `ToolSet.Add(ToolDefinition(...))` | Same as named Add, from a JSON definition |
+
+You can combine interface tools and named tools on the same `"AIOS Tool Set"`. Execution order for a name is: interface tool, then handler (if set), then `OnExecuteTool`.
+
+## Interface tools
+
+Implement `"AIOS Tool"` and add the codeunit to the set.
+
+<include lang="al" meta='title="MyEchoTool.al"'>samples/tools/MyEchoTool.al</include>
+
+<include lang="al" meta='title="AddInterfaceTool.al"'>samples/tools/AddInterfaceTool.al</include>
+
+## Handler packs
+
+Implement `"AIOS Tool Handler"` when several tools should share one object ID.
+
+`GetDefinitions` returns a JSON array of `{ name, description, parameters }` objects. Build each entry with `ToolSet.ToolDefinition(...)`.
+
+`ToolSet.Use(Handler)`:
+
+1. Stores the handler for execution
+2. Registers every definition from `GetDefinitions()`
+
+<include lang="al" meta='title="MyAppTools.al"'>samples/tools/MyAppTools.al</include>
+
+<include lang="al" meta='title="UseHandler.al"'>samples/tools/UseHandler.al</include>
+
+## Named tools and OnExecuteTool
+
+Register a definition on the tool set and handle execution in an `OnExecuteTool` subscriber on `"AIOS Tool Set"`.
+
+<include lang="al" meta='title="AddNamed.al"'>samples/tools/AddNamed.al</include>
+
+Equivalent registration from a definition object:
+
+<include lang="al" meta='title="AddDefinition.al"'>samples/tools/AddDefinition.al</include>
+
+Subscriber shape:
+
+<include lang="al" meta='title="OnExecuteTool.al"'>samples/tools/OnExecuteTool.al</include>
+
+Set `Handled := true` after handling the name. Set `Succeeded` to the tool outcome. When `Handled` stays `false` for a registered name, generation fails with a missing-executor error.
+
+## Manual step control
+
+Use `GenerateText(Model, Request)` when you want one model call per invocation. Attach tools with `Request.SetTools(ToolSet)`, then continue the conversation yourself.
+
+<include lang="al" meta='title="ManualContinue.al"'>samples/tools/ManualContinue.al</include>
+
+| Helper | Purpose |
+|---|---|
+| `Request.SetTools(ToolSet)` | Publishes tool definitions on the request |
+| `Request.EnsureMessagesFromPrompt()` | Builds the message list from system + prompt when empty |
+| `Request.AppendAssistantToolCalls(...)` | Adds the assistant turn that requested tools |
+| `ToolSet.Execute(Name, Arguments, ResultText)` | Runs one tool by name |
+| `Request.AppendToolResult(Id, Name, Content)` | Adds the tool result message correlated by call id |
+
+## Inspect the run
+
+| Accessor | Meaning |
+|---|---|
+| `Result.Output()` | Final text, or validated JSON when structured output applies |
+| `Result.HasToolCalls()` | Last model response still contains tool calls |
+| `Result.GetToolCalls()` | List of `"AIOS Tool Call"` from that response |
+| `Result.StoppedAtStepLimit()` | Loop ended because `MaxSteps` was reached with pending tool calls |
+| `Result.GetStepCount()` | Number of model HTTP calls in the run |
+| `Result.GetResponseCalls()` | Per-call metadata for each model request |
+| `Result.GetTotalInputTokens()` / `GetTotalOutputTokens()` | Aggregated usage across steps |
+
+## Tool Set reference
+
+| Procedure | Behavior |
+|---|---|
+| `Add(Tool)` | Registers an `"AIOS Tool"`; duplicate names error |
+| `Use(Handler)` | Sets the handler and registers all `GetDefinitions()` entries |
+| `Add(Name, Description, Parameters)` | Registers a named tool for handler or `OnExecuteTool` |
+| `Add(Definition)` | Registers from `{ name, description, parameters }` |
+| `ToolDefinition(Name, Description, Parameters)` | Builds one definition object |
+| `Register(Name, Description, Parameters)` | Same registration as named `Add` |
+| `SetHandler(Handler)` | Sets the executor for named tools (`Use` already calls this) |
+| `Execute(Name, Arguments, ResultText)` | Runs the tool; returns success from `Execute` |
+| `GetDefinitions()` | Combined definitions for interface + named tools |
+| `Count()` / `HasTool(Name)` | Inspection helpers |
+
+## Examples
+
+Toolkit samples in `"AIOS Usage Example"`:
+
+| Procedure | Pattern |
+|---|---|
+| `RunTools_AddInterfaceTool` | `Add(Tool)` |
+| `RunTools_UseHandler` | `Use(Handler)` |
+| `RunTools_AddNamed_OnExecuteTool` | Named Add + `OnExecuteTool` |
+| `RunTools_AddDefinition` | `Add(ToolDefinition(...))` |
+| `RunTools_MixInterfaceAndNamed` | Interface + named on one set |
+| `RunTools_ManualContinue` | Manual step control |
+
+Interactive UI: page `"AIOS Toolkit Demo"`.

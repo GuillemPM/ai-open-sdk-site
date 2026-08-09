@@ -1,0 +1,14 @@
+---
+description: Next.js / Fumadocs site conventions when editing app or lib code
+globs: app/**/*.{tsx,ts},components/**/*.tsx,lib/**/*.{ts,tsx},source.config.ts
+alwaysApply: false
+---
+
+# Fumadocs site
+
+- Prefer **Fumadocs** layouts/components (`fumadocs-ui`, `fumadocs-core`) over custom docs chrome
+- MDX components: extend via `components/mdx.tsx`; keep default Fumadocs MDX as base
+- Docs source: `lib/source.ts` → `content/docs`; learn: `lib/learn.ts` → `content/learn`
+- Preserve AL highlighting in `source.config.ts` / `lib/al-language.ts` (`langAlias.businesscentral` → `al`)
+- Before App Router / Next API changes, read `node_modules/next/dist/docs/`
+- Use `pnpm`; verify with `pnpm lint` and `pnpm build` after site changes

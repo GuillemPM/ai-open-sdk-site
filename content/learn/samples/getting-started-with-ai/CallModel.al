@@ -1,0 +1,10 @@
+Anthropic: Codeunit "AIOS Anthropic";
+Client: Codeunit "AIOS Client";
+Result: Codeunit "AIOS Generate Result";
+ApiKey: SecretText;
+begin
+    Result := Client.GenerateText(
+        Anthropic.Model('claude-sonnet-4-5', ApiKey),
+        'Say hello in one sentence');
+    Message(Result.Output());
+end;

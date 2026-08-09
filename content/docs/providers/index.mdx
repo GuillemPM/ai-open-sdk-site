@@ -1,0 +1,66 @@
+---
+title: Providers
+description: Core SDK plus one Business Central app extension per provider.
+---
+
+AI Open SDK splits into a **core** library and **provider extensions**. Your app depends on core plus only the providers you call. Swapping providers is a dependency and factory change; callers keep using `"AIOS Client"` and `"AIOS Language Model"`.
+
+## Packaging
+
+| App | Role |
+|---|---|
+| **AI Open SDK** | Core: `"AIOS Client"`, schema, tools, interfaces, `"AIOS Mock"` |
+| **AI Open SDK Anthropic** | `"AIOS Anthropic"` → Claude text models |
+| **AI Open SDK OpenAI** | `"AIOS OpenAI"` → chat and image models |
+| **AI Open SDK OpenCode Zen** | `"AIOS OpenCode Zen"` → Zen gateway |
+| **AI Open SDK OpenAI Compatible** | `"AIOS OpenAI Compatible"` → any Chat Completions base URL |
+| **AI Open SDK Provider Utils** | Shared Chat Completions helpers (pulled by some providers; not for app code) |
+
+Each provider extension depends on **AI Open SDK** (core). OpenAI, OpenCode Zen, and OpenAI Compatible also depend on Provider Utils. Your extension depends on core and on each provider app you install.
+
+```json
+"dependencies": [
+  {
+    "id": "f624c4ac-75e8-4ce4-9a31-c2d6ff2a05a1",
+    "name": "AI Open SDK",
+    "publisher": "Guillermo Padilla",
+    "version": "0.1.0.0"
+  },
+  {
+    "id": "b6caa435-9837-4155-9932-0b591bdeb4d1",
+    "name": "AI Open SDK Anthropic",
+    "publisher": "Guillermo Padilla",
+    "version": "0.1.0.0"
+  }
+]
+```
+
+Use the published App Ids from AppSource or your symbol feed. Install only the provider apps you need.
+
+## Capabilities
+
+| Extension | Factory | Text | Image |
+|---|---|---|---|
+| AI Open SDK (core) | `"AIOS Mock"` | Yes | Yes |
+| AI Open SDK Anthropic | `"AIOS Anthropic"` | Yes | No |
+| AI Open SDK OpenAI | `"AIOS OpenAI"` | Yes | Yes |
+| AI Open SDK OpenCode Zen | `"AIOS OpenCode Zen"` | Yes | No |
+| AI Open SDK OpenAI Compatible | `"AIOS OpenAI Compatible"` | Yes | No |
+
+## How a provider plugs in
+
+1. The provider app implements `"AIOS Provider"` and returns `"AIOS Language Model"` (and `"AIOS Image Model"` when supported).
+2. Your code calls `Factory.Model(...)` (or `ImageModel(...)`) and passes the model into `"AIOS Client"`.
+3. API keys use `SecretText` end to end.
+
+<include lang="al" meta='title="PlugIn.al"'>samples/index/PlugIn.al</include>
+
+## Provider pages
+
+- [Anthropic](/docs/providers/anthropic)
+- [OpenAI](/docs/providers/openai)
+- [OpenCode Zen](/docs/providers/opencode-zen)
+- [Mock](/docs/providers/mock)
+- [Custom providers](/docs/providers/custom)
+
+**Also available:** `"AIOS OpenAI Compatible"` for any Chat Completions base URL (no dedicated page yet). **Planned:** Azure OpenAI, System.AI platform provider.

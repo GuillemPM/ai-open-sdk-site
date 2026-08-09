@@ -1,0 +1,20 @@
+---
+description: AL sample files and MDX include wiring conventions
+globs: content/**/*.{mdx,al}
+alwaysApply: false
+---
+
+# AL samples
+
+- Put examples in colocated `samples/<topic>/File.al` next to the MDX tree
+- Embed with include. Do not paste large AL fences in MDX:
+
+```mdx
+<include lang="al" meta='title="MultiStep.al"'>samples/tools/MultiStep.al</include>
+```
+
+- `meta` title must match the filename
+- Keep samples **minimal** and realistic (SecretText for keys; no real credentials)
+- One idea per file; prefer small focused snippets over full apps
+- Hero snippets live under `content/al/hero/` and are wired from `lib/hero-examples.ts`
+- If prose describes an API, a sample (or link to one) must demonstrate it

@@ -1,0 +1,48 @@
+---
+title: OpenCode Zen
+description: OpenAI-compatible models through the AI Open SDK OpenCode Zen extension.
+---
+
+**AI Open SDK OpenCode Zen** is a Business Central app that depends on **AI Open SDK** (core) and exposes the `"AIOS OpenCode Zen"` factory. It talks to the [OpenCode Zen](https://opencode.ai/zen) OpenAI-compatible gateway.
+
+| | |
+|---|---|
+| App name | AI Open SDK OpenCode Zen |
+| Factory | `"AIOS OpenCode Zen"` |
+| Provider id | `opencode-zen` |
+| Text | Yes (`/chat/completions`) |
+| Image | No |
+| Default base URL | `https://opencode.ai/zen/v1` |
+| Auth | API key from [opencode.ai/auth](https://opencode.ai/auth) |
+
+## Dependencies
+
+Your extension depends on:
+
+1. **AI Open SDK** (core)
+2. **AI Open SDK OpenCode Zen**
+
+## Generate text
+
+<include lang="al" meta='title="GenerateText.al"'>samples/opencode-zen/GenerateText.al</include>
+
+Pass the model id published by Zen for the backend you want (for example a Claude, GPT, or DeepSeek model available on the gateway).
+
+## Reasoning content
+
+Models that return `reasoning_content` (for example DeepSeek through Zen) keep that field on the response. During a tool loop, the client echoes reasoning on follow-up assistant turns so multi-step runs stay coherent.
+
+## Factory API
+
+| Procedure | Behavior |
+|---|---|
+| `Model(ModelId, KeyValue)` | Sets the API key and returns `"AIOS Language Model"` |
+| `Model(ModelId)` | Returns a model using a key from `SetApiKey` |
+| `SetApiKey(KeyValue)` | Stores the Zen API key as `SecretText` |
+| `SetBaseUrl(Url)` | Overrides the API base (default `https://opencode.ai/zen/v1`) |
+| `GetName()` | Returns `opencode-zen` |
+| `BindLanguageModel(ModelId, BoundModel)` | Soft-bind; returns `false` when model id or key is missing |
+
+## Keys
+
+Load the Zen API key into `SecretText`. Authorization uses `Bearer` with the SecretText overload.

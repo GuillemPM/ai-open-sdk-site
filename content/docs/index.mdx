@@ -1,0 +1,51 @@
+---
+title: Introduction
+description: What AI Open SDK is and when to use it from AL.
+---
+
+**AI Open SDK** is a provider-agnostic AI library for Microsoft Dynamics 365 Business Central, written in AL. Call large language models through one client API, with structured output, tools, retries, image generation, and an in-core mock provider for tests.
+
+It is a library you depend on from your extensions. It is not Copilot, not a hosted AI service, and not a Microsoft product.
+
+Status: **v0.1** (usable client + providers; pre-1.0, public APIs may still change).
+
+## What you get
+
+| Capability | Surface |
+|---|---|
+| Text and image generation | `"AIOS Client"` + a provider factory |
+| Structured JSON | `"AIOS Schema"` with validation (optional RecRef binding) |
+| Tool calling | `"AIOS Tool Set"` with automatic multi-step loops |
+| Retries / backoff | Shared across text and image calls |
+| Unit tests without keys | `"AIOS Mock"` in Core |
+
+Provider selection is a dependency and factory change. Callers keep using `"AIOS Client"` and `"AIOS Language Model"`.
+
+## Packaging
+
+**Core** ships as one Business Central app. Each live provider is a separate extension. Install only what you call. HTTP goes directly to the provider; this is not a wrapper around System.AI.
+
+| App | Role |
+|---|---|
+| **AI Open SDK** | Client, schema, tools, interfaces, Mock |
+| **AI Open SDK Anthropic** | Claude text models |
+| **AI Open SDK OpenAI** | OpenAI chat and image |
+| **AI Open SDK OpenCode Zen** | OpenCode Zen gateway |
+| **AI Open SDK OpenAI Compatible** | Any Chat Completions base URL |
+
+Some providers also pull **AI Open SDK Provider Utils** (shared Chat Completions helpers). Application code does not call Provider Utils directly.
+
+## When to use it
+
+| Situation | Choice |
+|---|---|
+| Microsoft-hosted Copilot / System.AI capability | Use System.AI / Copilot |
+| Third-party provider, self-hosted endpoint, or AI logic you must unit-test | Use AI Open SDK |
+
+## Next steps
+
+| Goal | Page |
+|---|---|
+| Install and run `GenerateText` | [Getting Started](/docs/getting-started) |
+| Client, schema, tools, mock, retries | [Concepts](/docs/concepts) |
+| Factory setup per vendor | [Providers](/docs/providers) |

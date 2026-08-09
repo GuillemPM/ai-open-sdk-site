@@ -1,0 +1,28 @@
+---
+title: Mock Provider
+description: Test AI-dependent AL without network or API keys.
+---
+
+`"AIOS Mock"` ships in **AI Open SDK** (core). It is an in-memory provider for text and image generation: no HTTP and no API keys.
+
+Core and provider logic that you cover in CI should pass with Mock. Live API keys stay out of the pipeline.
+
+## Why it matters
+
+AI calls are side effects. With Mock you assert on prompts, structured output, and tool loops deterministically:
+
+- Tests run without secrets or network
+- Failures stay reproducible
+- Provider outages do not block CI
+
+## Setup
+
+1. Depend on **AI Open SDK** (core).
+2. Queue the next response (or error / tool call) on the factory.
+3. Call `"AIOS Client"` with `Mock.Model(...)` or `Mock.ImageModel(...)`.
+
+<include lang="al" meta='title="GenerateText.al"'>samples/mock/GenerateText.al</include>
+
+Image: `Mock.SetNextImageBase64(...)` then `Client.GenerateImage(Mock.ImageModel(...), ...)`.
+
+Full factory surface: [Mock provider](/docs/providers/mock). Contribution rule: mock-provider tests cover provider or client logic you touch. See [Contributing](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/CONTRIBUTING.md).

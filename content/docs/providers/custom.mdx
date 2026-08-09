@@ -1,0 +1,51 @@
+---
+title: Custom Providers
+description: Ship your own provider as a Business Central app extension on AI Open SDK.
+---
+
+A custom provider is a separate app that depends on **AI Open SDK** (core) and returns models through the same interfaces as Anthropic, OpenAI, and OpenCode Zen.
+
+## What you implement
+
+| Interface | Required when |
+|---|---|
+| `"AIOS Language Model"` | Text generation |
+| `"AIOS Image Model"` | Image generation |
+| `"AIOS Provider"` | Factory surface (`GetName`, bind helpers) matching shipped providers |
+| `"AIOS Chat Format"` | Your HTTP message/tool JSON differs from the built-in formats |
+
+Core already ships reusable formats:
+
+- `"AIOS OpenAI Compatible Format"`
+- `"AIOS Anthropic Format"`
+
+Reuse one of those when your endpoint matches that schema. Implement `"AIOS Chat Format"` when the wire shape is different.
+
+## Extension layout
+
+1. Create a new AL app with its own `idRanges` and App Id.
+2. Add a dependency on **AI Open SDK** (core) in `app.json`.
+3. Implement the language (and optional image) model codeunits.
+4. Expose a public factory codeunit (same pattern as `"AIOS Anthropic"`): `Model(ModelId, KeyValue)`, `SetApiKey`, optional `SetBaseUrl` / version helpers.
+5. Cover behavior with `"AIOS Mock"` (in Core) in tests. Live keys stay out of CI.
+
+```json
+"dependencies": [
+  {
+    "id": "<core-app-id>",
+    "name": "AI Open SDK",
+    "publisher": "Guillermo Padilla",
+    "version": "0.1.0.0"
+  }
+]
+```
+
+## Consumer usage
+
+Downstream apps depend on core plus your provider app, then call your factory and `"AIOS Client"`:
+
+<include lang="al" meta='title="Consumer.al"'>samples/custom/Consumer.al</include>
+
+## Contract stability
+
+Changes to `"AIOS Language Model"`, `"AIOS Chat Request"` / response tables, and structured-output validation are high impact. Additional provider adapters are additive. See [Governance](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/GOVERNANCE.md).

@@ -1,0 +1,41 @@
+---
+title: Mock
+description: In-memory models through AIOS Mock in Core.
+---
+
+`"AIOS Mock"` ships in **AI Open SDK** (core). It runs entirely in memory: no network and no API keys.
+
+| | |
+|---|---|
+| App | AI Open SDK (core) |
+| Factory | `"AIOS Mock"` |
+| Provider id | `mock` |
+| Text | Yes |
+| Image | Yes |
+
+Use Mock in test apps and CI. Production apps that call live providers still use Mock when automated tests exercise AI paths. No extra extension to install.
+
+## Dependencies
+
+Your test (or app) extension depends on **AI Open SDK** (core).
+
+## Generate text
+
+<include lang="al" meta='title="GenerateText.al"'>samples/mock/GenerateText.al</include>
+
+## Queue behavior
+
+Configure the next outcome on the factory before `GenerateText` / `GenerateImage`:
+
+| Procedure | Behavior |
+|---|---|
+| `SetNextResponse(Content)` | Next text call returns this content |
+| `SetNextError(ErrorType, ErrorMessage)` | Next call fails with the given error |
+| `SetFailuresBeforeSuccess(Count)` | Fail `Count` times, then succeed (retry tests) |
+| `SetNextToolCall(Id, Name, ArgumentsJson)` | Next call returns one tool call |
+| `SetNextToolCallThenResponse(...)` | Tool call on the first step, then a final text response |
+| `SetNextImageBase64(Base64, MediaType)` | Next image call returns one image |
+| `Model(ModelId)` | Returns `"AIOS Language Model"` (no API key) |
+| `ImageModel(ModelId)` | Returns `"AIOS Image Model"` (no API key) |
+
+See [Mock provider concepts](/docs/concepts/mock) for why AI-dependent AL needs a deterministic provider in CI.

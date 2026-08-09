@@ -1,0 +1,68 @@
+---
+title: Getting Started
+description: Install core and a provider, then call GenerateText from AL.
+---
+
+Get from zero to a working `GenerateText` call: install symbols, declare dependencies, then call `"AIOS Client"` with a provider model.
+
+## Prerequisites
+
+1. Install the [AL Language](https://marketplace.visualstudio.com/items?itemName=ms-dynamics-smb.al) extension.
+2. Ensure Business Central Application symbols are available (**Application 28.x**).
+3. Add **AI Open SDK** (core) and at least one **provider extension** as dependencies of your app.
+
+Source repository: [GuillemPM/AL-AI-Toolkit](https://github.com/GuillemPM/AL-AI-Toolkit).
+
+## Choose apps
+
+Provider adapters ship as separate Business Central apps. Your extension depends on core plus each provider you call. `"AIOS Mock"` lives in core, so tests need no extra app.
+
+| Need | Depend on |
+|---|---|
+| Client + Mock tests | **AI Open SDK** (core) |
+| Anthropic | Core + **AI Open SDK Anthropic** |
+| OpenAI chat / image | Core + **AI Open SDK OpenAI** |
+| OpenCode Zen | Core + **AI Open SDK OpenCode Zen** |
+| Any Chat Completions URL | Core + **AI Open SDK OpenAI Compatible** |
+
+OpenAI, OpenCode Zen, and OpenAI Compatible also require **AI Open SDK Provider Utils**; that dependency is declared on the provider app, so you usually do not list it yourself.
+
+Example `app.json` fragment for Anthropic:
+
+```json
+"dependencies": [
+  {
+    "id": "f624c4ac-75e8-4ce4-9a31-c2d6ff2a05a1",
+    "name": "AI Open SDK",
+    "publisher": "Guillermo Padilla",
+    "version": "0.1.0.0"
+  },
+  {
+    "id": "b6caa435-9837-4155-9932-0b591bdeb4d1",
+    "name": "AI Open SDK Anthropic",
+    "publisher": "Guillermo Padilla",
+    "version": "0.1.0.0"
+  }
+]
+```
+
+App Ids match the published toolkit packages. Prefer the Ids from your symbol feed or AppSource if they differ.
+
+## First call
+
+Load the API key into `SecretText`, bind a model from the provider factory, and call `"AIOS Client"`:
+
+<include lang="al" meta='title="FirstCall.al"'>samples/getting-started/FirstCall.al</include>
+
+`GenerateText` returns `"AIOS Generate Result"` and errors on failure. Keep API keys as `SecretText` end to end (hidden in the debugger; HTTP headers use the SecretText overloads).
+
+## What to try next
+
+| Goal | Start here |
+|---|---|
+| Structured JSON | [Structured output](/docs/concepts/structured-output) |
+| Tool calling | [Tools](/docs/concepts/tools) |
+| Unit tests without keys | [Mock](/docs/concepts/mock) |
+| Provider setup | [Providers](/docs/providers) |
+
+Interactive samples live in the toolkit repo under `apps/AIOpenSDK.Examples/` (demo page `"AIOS Toolkit Demo"` and usage codeunits).

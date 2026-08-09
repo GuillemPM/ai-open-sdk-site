@@ -1,0 +1,48 @@
+---
+description: Professional docs voice for MDX. Clear, digestible, no fluff.
+globs: content/**/*.mdx
+alwaysApply: false
+---
+
+# Docs voice
+
+Write like a senior docs engineer: precise, calm, easy to skim.
+
+- **One job per section.** One heading, one short lead, then detail.
+- **Lead with the idea.** First sentence states what and why, then show code.
+- **Concrete verbs.** "Pass a tool set into `GenerateText`", not "You can leverage tools".
+- **Tables for decisions.** Patterns, outcomes, when-to-use.
+- **Progressive disclosure.** Happy path first; edge cases after the sample.
+- No emojis, marketing filler, or "In this article..." openers.
+
+## Sound human
+
+Docs copy should read like a person wrote it. Do not paste AI punctuation habits into prose.
+
+**Do not use as clause separators:**
+
+- Em dash (`—`)
+- En dash (`–`)
+- Spaced hyphen asides (`word - word`) that stand in for an em dash
+
+**Rewrite instead** with a comma, a period and a new sentence, parentheses, or a colon when defining a term.
+
+```mdx
+<!-- BAD (em dash or spaced hyphen aside) -->
+Each provider is a separate extension - install only what you call.
+Call models through one API—with tools and retries.
+
+<!-- GOOD -->
+Each provider is a separate extension. Install only what you call.
+Call models through one API, with tools and retries.
+```
+
+**Also avoid:** curly quotes (`“ ” ‘ ’`), ellipsis character (`…`), non-breaking/thin spaces, fancy arrows.
+
+**Hyphens are fine** in compound words (`provider-agnostic`), code, paths, and markdown list markers. For missing table values prefer `No` or leave a clear word, not a dash glyph.
+
+Definition lists in bullets: prefer a bold term and a colon, or a full sentence.
+
+```mdx
+- **Name:** stable identifier sent to the provider (for example `echo`)
+```

@@ -1,0 +1,51 @@
+---
+title: OpenAI
+description: Chat and image models through the AI Open SDK OpenAI extension.
+---
+
+**AI Open SDK OpenAI** is a Business Central app that depends on **AI Open SDK** (core) and exposes the `"AIOS OpenAI"` factory.
+
+| | |
+|---|---|
+| App name | AI Open SDK OpenAI |
+| Factory | `"AIOS OpenAI"` |
+| Provider id | `openai` |
+| Text | Yes (`/chat/completions`) |
+| Image | Yes (`/images/generations`) |
+| Default base URL | `https://api.openai.com/v1` |
+
+## Dependencies
+
+Your extension depends on:
+
+1. **AI Open SDK** (core)
+2. **AI Open SDK OpenAI**
+
+## Generate text
+
+<include lang="al" meta='title="GenerateText.al"'>samples/openai/GenerateText.al</include>
+
+## Generate image
+
+<include lang="al" meta='title="GenerateImage.al"'>samples/openai/GenerateImage.al</include>
+
+For size, quality, count, and other options, build an `"AIOS Image Request"` and call `Client.GenerateImage(Model, Request)`.
+
+## Factory API
+
+| Procedure | Behavior |
+|---|---|
+| `Model(ModelId, KeyValue)` | Sets the API key and returns `"AIOS Language Model"` |
+| `Model(ModelId)` | Returns a chat model using a key from `SetApiKey` |
+| `ImageModel(ModelId, KeyValue)` | Sets the API key and returns `"AIOS Image Model"` |
+| `ImageModel(ModelId)` | Returns an image model using a key from `SetApiKey` |
+| `SetApiKey(KeyValue)` | Stores the OpenAI API key as `SecretText` |
+| `SetBaseUrl(Url)` | Overrides the API base (default `https://api.openai.com/v1`) |
+| `GetName()` | Returns `openai` |
+| `BindLanguageModel` / `BindImageModel` | Soft-bind; returns `false` when model id or key is missing |
+
+Use `SetBaseUrl` for compatible gateways that speak the OpenAI HTTP shape under a different host.
+
+## Keys
+
+Load the key into `SecretText` from Isolated Storage or a setup table. Authorization uses `Bearer` with the SecretText overload.
