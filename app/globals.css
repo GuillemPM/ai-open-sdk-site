@@ -20,7 +20,7 @@ body {
 @keyframes aios-fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(18px);
   }
   to {
     opacity: 1;
@@ -37,6 +37,46 @@ body {
   }
 }
 
+@keyframes aios-hero-mark-in {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes aios-hero-from-center-left {
+  from {
+    transform: translateX(2rem);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes aios-hero-from-center-right {
+  from {
+    transform: translateX(-2rem);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes aios-hero-unfold {
+  from {
+    -webkit-mask-size: 100% 0%;
+    mask-size: 100% 0%;
+  }
+  to {
+    -webkit-mask-size: 100% 175%;
+    mask-size: 100% 175%;
+  }
+}
+
 @keyframes aios-code-shine {
   from {
     background-position: 120% 0;
@@ -44,6 +84,59 @@ body {
   to {
     background-position: -20% 0;
   }
+}
+
+@keyframes aios-glow-wave {
+  0%,
+  100% {
+    opacity: var(--aios-glow-opacity, 0.4);
+    transform: translateX(-50%) translate(0, 0) scale(1);
+  }
+  33% {
+    opacity: calc(var(--aios-glow-opacity, 0.4) * 1.2);
+    transform: translateX(-50%) translate(2.5%, -1.5%) scale(1.04);
+  }
+  66% {
+    opacity: calc(var(--aios-glow-opacity, 0.4) * 0.85);
+    transform: translateX(-50%) translate(-2%, 1.2%) scale(0.97);
+  }
+}
+
+/* Hero entrance: mark → sides slide + soft unfold → code */
+.aios-hero-enter-mark {
+  animation: aios-hero-mark-in 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.02s both;
+}
+
+.aios-hero-enter-left {
+  animation: aios-hero-from-center-left 1.05s cubic-bezier(0.16, 1, 0.3, 1) 0.28s
+    both;
+}
+
+.aios-hero-enter-right {
+  animation: aios-hero-from-center-right 1.05s cubic-bezier(0.16, 1, 0.3, 1)
+    0.28s both;
+}
+
+.aios-hero-unfold {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    #000 0%,
+    #000 42%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, #000 0%, #000 42%, transparent 100%);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: top center;
+  mask-position: top center;
+  -webkit-mask-size: 100% 0%;
+  mask-size: 100% 0%;
+  animation: aios-hero-unfold 1.25s cubic-bezier(0.4, 0, 0.2, 1) 0.34s both;
+  will-change: mask-size, -webkit-mask-size;
+}
+
+.aios-hero-enter-demo {
+  animation: aios-fade-up 1s cubic-bezier(0.16, 1, 0.3, 1) 1.05s both;
 }
 
 .aios-fade-up {
@@ -82,17 +175,129 @@ body {
   text-align: right;
 }
 
+/* Vercel-style hero: title | mark | copy */
+.aios-hero-stage {
+  min-height: 0;
+}
+
+@media (min-width: 1024px) {
+  .aios-hero-stage {
+    min-height: clamp(280px, 42vw, 420px);
+  }
+}
+
+.aios-hero-mark {
+  position: relative;
+  isolation: isolate;
+  aspect-ratio: 1;
+  width: 100%;
+}
+
+.aios-hero-mark::before {
+  content: '';
+  position: absolute;
+  inset: 12%;
+  z-index: 0;
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle at 50% 45%,
+    color-mix(in oklab, var(--color-fd-foreground) 18%, transparent),
+    transparent 68%
+  );
+  filter: blur(28px);
+}
+
+.aios-hero-mark-img {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: auto;
+  display: block;
+  opacity: 0.92;
+  mix-blend-mode: multiply;
+  -webkit-mask-image: radial-gradient(
+    circle at 50% 48%,
+    #000 42%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(circle at 50% 48%, #000 42%, transparent 78%);
+}
+
+.dark .aios-hero-mark-img {
+  opacity: 1;
+  mix-blend-mode: screen;
+  filter: brightness(1.2) contrast(1.05);
+}
+
+.dark .aios-hero-mark::before {
+  background: radial-gradient(
+    circle at 50% 45%,
+    rgba(255, 255, 255, 0.2),
+    transparent 68%
+  );
+}
+
+/* Code demo: outer lighting + inner atmosphere */
+.aios-hero-demo {
+  isolation: isolate;
+}
+
+.aios-hero-frame-glow {
+  pointer-events: none;
+  position: absolute;
+  z-index: 0;
+  left: 50%;
+  top: -5%;
+  width: 94%;
+  height: 86%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  --aios-glow-opacity: 0.58;
+  background: radial-gradient(
+    ellipse at 50% 28%,
+    color-mix(in oklab, var(--color-fd-foreground) 28%, transparent),
+    color-mix(in oklab, var(--color-fd-foreground) 8%, transparent) 46%,
+    transparent 74%
+  );
+  filter: blur(38px);
+  opacity: var(--aios-glow-opacity);
+  animation: aios-glow-wave 11s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
+.dark .aios-hero-frame-glow {
+  --aios-glow-opacity: 0.72;
+  background: radial-gradient(
+    ellipse at 50% 24%,
+    rgba(255, 255, 255, 0.34),
+    rgba(255, 255, 255, 0.1) 40%,
+    transparent 72%
+  );
+  filter: blur(42px);
+}
+
 /* Hero frame atmosphere: mesh + grain inside a rounded container */
 .aios-hero-frame {
   position: relative;
+  z-index: 1;
   overflow: hidden;
   isolation: isolate;
-  border: 1px solid var(--color-fd-border);
+  border: 1px solid color-mix(in oklab, var(--color-fd-border) 72%, var(--color-fd-foreground) 12%);
   border-radius: 1rem;
   background: color-mix(in oklab, var(--color-fd-background) 82%, var(--color-fd-foreground) 5%);
   box-shadow:
-    0 1px 0 color-mix(in oklab, var(--color-fd-foreground) 4%, transparent),
-    0 24px 48px -32px rgba(0, 0, 0, 0.35);
+    0 1px 0 color-mix(in oklab, var(--color-fd-foreground) 9%, transparent),
+    0 20px 52px -30px rgba(0, 0, 0, 0.45),
+    0 0 88px -18px color-mix(in oklab, var(--color-fd-foreground) 18%, transparent);
+}
+
+.dark .aios-hero-frame {
+  border-color: color-mix(in oklab, var(--color-fd-border) 48%, white 22%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.13),
+    0 1px 0 rgba(255, 255, 255, 0.07),
+    0 24px 60px -32px rgba(0, 0, 0, 0.82),
+    0 0 100px -16px rgba(255, 255, 255, 0.26);
 }
 
 .aios-atmosphere {
@@ -107,18 +312,18 @@ body {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 70% 55% at 50% -5%, rgba(0, 0, 0, 0.09), transparent 60%),
-    radial-gradient(ellipse 45% 40% at 8% 35%, rgba(0, 0, 0, 0.055), transparent 55%),
-    radial-gradient(ellipse 42% 38% at 92% 30%, rgba(0, 0, 0, 0.05), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 50% 75%, rgba(0, 0, 0, 0.035), transparent 65%);
+    radial-gradient(ellipse 78% 60% at 50% -8%, rgba(0, 0, 0, 0.11), transparent 62%),
+    radial-gradient(ellipse 48% 42% at 10% 30%, rgba(0, 0, 0, 0.06), transparent 55%),
+    radial-gradient(ellipse 44% 40% at 90% 28%, rgba(0, 0, 0, 0.05), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 50% 78%, rgba(0, 0, 0, 0.04), transparent 65%);
 }
 
 .dark .aios-mesh {
   background:
-    radial-gradient(ellipse 70% 55% at 50% -5%, rgba(255, 255, 255, 0.12), transparent 60%),
-    radial-gradient(ellipse 45% 40% at 8% 35%, rgba(255, 255, 255, 0.065), transparent 55%),
-    radial-gradient(ellipse 42% 38% at 92% 30%, rgba(255, 255, 255, 0.055), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 50% 75%, rgba(255, 255, 255, 0.04), transparent 65%);
+    radial-gradient(ellipse 84% 60% at 50% -12%, rgba(255, 255, 255, 0.22), transparent 58%),
+    radial-gradient(ellipse 48% 42% at 14% 30%, rgba(255, 255, 255, 0.08), transparent 55%),
+    radial-gradient(ellipse 44% 40% at 86% 28%, rgba(255, 255, 255, 0.07), transparent 55%),
+    radial-gradient(ellipse 55% 45% at 50% 80%, rgba(255, 255, 255, 0.045), transparent 65%);
 }
 
 .aios-grain {
@@ -137,7 +342,7 @@ body {
 }
 
 .aios-code-panel {
-  animation: aios-fade-in 0.9s ease-out 0.2s both;
+  animation: aios-fade-in 1s ease-out 1.25s both;
 }
 
 .aios-code-panel::before {
@@ -154,15 +359,38 @@ body {
     transparent 60%
   );
   background-size: 200% 100%;
-  animation: aios-code-shine 2.4s ease-out 0.6s both;
+  animation: aios-code-shine 2.4s ease-out 1.65s both;
+}
+
+@media (max-width: 1023px) {
+  .aios-hero-enter-left,
+  .aios-hero-enter-right {
+    animation-name: aios-fade-up;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .aios-fade-up,
   .aios-fade-up-delay,
   .aios-fade-up-delay-2,
+  .aios-hero-enter-mark,
+  .aios-hero-enter-left,
+  .aios-hero-enter-right,
+  .aios-hero-enter-demo,
+  .aios-hero-unfold,
+  .aios-hero-frame-glow,
   .aios-code-panel,
   .aios-code-panel::before {
     animation: none;
+  }
+
+  .aios-hero-unfold {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .aios-hero-frame-glow {
+    opacity: var(--aios-glow-opacity, 0.4);
+    transform: translateX(-50%);
   }
 }
