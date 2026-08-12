@@ -1,17 +1,70 @@
 ---
 title: Getting Started
-description: Install core and a provider, then call GenerateText from AL.
+description: Get the apps, declare dependencies, then call GenerateText from AL.
 ---
 
-Get from zero to a working `GenerateText` call: install symbols, declare dependencies, then call `"AIOS Client"` with a provider model.
+Get from zero to a working `GenerateText` call: install the apps, declare dependencies, then call `"AIOS Client"` with a provider model.
 
 ## Prerequisites
 
 1. Install the [AL Language](https://marketplace.visualstudio.com/items?itemName=ms-dynamics-smb.al) extension.
 2. Ensure Business Central Application symbols are available (**Application 28.x**).
-3. Add **AI Open SDK** (core) and at least one **provider extension** as dependencies of your app.
+3. Have a sandbox or dev environment you can publish extensions to.
 
-Source repository: [GuillemPM/AL-AI-Toolkit](https://github.com/GuillemPM/AL-AI-Toolkit).
+Source repository: [GuillemPM/AL-AI-Toolkit](https://github.com/GuillemPM/AL-AI-Toolkit) (MIT).
+
+## Get the apps
+
+The SDK ships as several standalone Business Central extensions. You can install the packaged apps, or clone the repository and build them yourself.
+
+| Route | Use when |
+|---|---|
+| [Download a release](#download-a-release) | You want to consume the SDK from your own app |
+| [Build from source](#build-from-source) | You want to change the SDK, or run the demo and tests |
+
+### Download a release
+
+Packaged `.app` files are published on the [Releases page](https://github.com/GuillemPM/AL-AI-Toolkit/releases). Download the apps you need, then upload them in Business Central under **Extension Management**, using **Manage > Upload Extension**.
+
+Install in dependency order, because Business Central rejects an app whose dependencies are not present yet:
+
+1. **AI Open SDK** (core).
+2. **AI Open SDK Provider Utils**, if you install OpenAI, OpenCode Zen, or OpenAI Compatible.
+3. The provider apps you call.
+
+### Build from source
+
+Clone the repository once, then package and publish the stack to your environment:
+
+```bash
+git clone https://github.com/GuillemPM/AL-AI-Toolkit.git
+cd AL-AI-Toolkit
+```
+
+Every folder under `apps/` is a standalone AL extension with its own `app.json` and `src/`. Open `AL-AI-Toolkit.code-workspace` for the whole stack, or open a single app folder if you only work on one.
+
+1. Open `apps/AIOpenSDK.Core`, point `.vscode/launch.json` at your environment, then run **AL: Download Symbols** once. This fills the shared `.alpackages/`.
+2. From the repository root, package core and Provider Utils so the provider apps can resolve them:
+
+   ```bash
+   ./scripts/prepare-deps.sh     # Linux or macOS
+   ```
+
+   ```powershell
+   .\scripts\prepare-deps.ps1    # Windows
+   ```
+
+3. Publish core, Provider Utils, and the providers to your dev endpoint:
+
+   ```powershell
+   $env:BC_USERNAME = 'YOUR_USER'
+   $env:BC_PASSWORD = 'YOUR_PASSWORD'
+   .\scripts\publish-apps.ps1
+   ```
+
+   The target comes from `apps/AIOpenSDK.Core/.vscode/launch.json`. Override it with `BC_SERVER`, or with `-Server` on the script. There is a `publish-apps.sh` for Linux and macOS.
+
+Alternatively, open a single app and use **Package** and **Publish** from VS Code. Full workflows, including provider-only development, live in [docs/DEVELOPMENT.md](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/docs/DEVELOPMENT.md).
 
 ## Choose apps
 
@@ -46,7 +99,7 @@ Example `app.json` fragment for Anthropic:
 ]
 ```
 
-App Ids match the published toolkit packages. Prefer the Ids from your symbol feed or AppSource if they differ.
+App Ids match the published toolkit packages. Prefer the Ids from your symbol feed or the release you installed if they differ.
 
 ## First call
 
@@ -54,7 +107,25 @@ Load the API key into `SecretText`, bind a model from the provider factory, and 
 
 <include lang="al" meta='title="FirstCall.al"'>samples/getting-started/FirstCall.al</include>
 
-`GenerateText` returns `"AIOS Generate Result"` and errors on failure. Keep API keys as `SecretText` end to end (hidden in the debugger; HTTP headers use the SecretText overloads).
+`GenerateText` returns `"AIOS Generate Result"` and errors on failure, so there is no status code to check on the happy path. `Result.Output()` holds the reply text, and the `Message` above shows something like:
+
+```text
+Hello. How can I help you today?
+```
+
+The same result carries the raw response and usage alongside the text, which is what you inspect while wiring things up:
+
+| Accessor | Example value |
+|---|---|
+| `Result.Output()` | `Hello. How can I help you today?` |
+| `Result.HttpStatusCode()` | `200` |
+| `Result.GetStepCount()` | `1` |
+| `Result.GetTotalInputTokens()` | `9` |
+| `Result.GetTotalOutputTokens()` | `12` |
+
+Full surface: [AIOS Generate Result](/docs/api/generate-result).
+
+Keep API keys as `SecretText` end to end (hidden in the debugger; HTTP headers use the SecretText overloads).
 
 ## What to try next
 

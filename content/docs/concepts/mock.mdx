@@ -23,6 +23,18 @@ AI calls are side effects. With Mock you assert on prompts, structured output, a
 
 <include lang="al" meta='title="GenerateText.al"'>samples/mock/GenerateText.al</include>
 
+The queued response comes back verbatim, which is what makes assertions stable:
+
+```text
+Hello from mock
+```
+
+So the test asserts on a known value rather than on whatever a live model happened to say:
+
+```al
+Assert.AreEqual('Hello from mock', Result.Output(), 'Unexpected output');
+```
+
 Image: `Mock.SetNextImageBase64(...)` then `Client.GenerateImage(Mock.ImageModel(...), ...)`.
 
 Full factory surface: [Mock provider](/docs/providers/mock). Contribution rule: mock-provider tests cover provider or client logic you touch. See [Contributing](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/CONTRIBUTING.md).

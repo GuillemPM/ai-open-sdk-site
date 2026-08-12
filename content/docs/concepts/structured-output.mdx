@@ -11,12 +11,30 @@ Build a schema with `"AIOS Schema"`, attach it to the request, then read validat
 
 <include lang="al" meta='title="SchemaOutput.al"'>samples/structured-output/SchemaOutput.al</include>
 
+`Result.Output()` is validated JSON text, carrying exactly the fields the schema declared:
+
+```json
+{
+  "summary": "Shipping was late, but support resolved it quickly.",
+  "score": 3.5
+}
+```
+
+Validation happens before you read it, so `Result.Output()` either matches the schema or the call errors. You never parse a half-formed response.
+
 ## Flat RecRef convenience
 
 For binding into a record:
 
 <include lang="al" meta='title="RecRefOutput.al"'>samples/structured-output/RecRefOutput.al</include>
 
-Flat RecRef binding fills record fields from the validated JSON. Use schema-validated JSON when you need a stable contract across versions.
+Flat RecRef binding fills record fields from the validated JSON. Given the same two fields, the record comes back populated and the JSON is still on the result:
+
+| Field | Value after the call |
+|---|---|
+| `Summary` | `Shipping was late, but support resolved it quickly.` |
+| `Score` | `3.5` |
+
+Use schema-validated JSON when you need a stable contract across versions.
 
 With a tool loop, structured output and RecRef binding run on the final non-tool-call step only.

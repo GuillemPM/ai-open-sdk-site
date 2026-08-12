@@ -49,6 +49,26 @@ The client:
 
 Structured output and RecRef binding run on the final non-tool-call step only.
 
+### A run, end to end
+
+With the `echo` tool registered and a prompt of `Echo the word ping`, the loop takes two model calls. The model asks for the tool, the client runs it and sends the result back, and the second response is the final answer:
+
+| Step | Model returns | Client does |
+|---|---|---|
+| 1 | tool call `echo` with `{"message":"ping"}` | Runs `Execute`, appends `ping` as the tool result |
+| 2 | `The echo tool returned: ping` | Stops, because there are no tool calls left |
+
+The result reflects the whole run, not just the last call:
+
+| Accessor | Value |
+|---|---|
+| `Result.Output()` | `The echo tool returned: ping` |
+| `Result.GetStepCount()` | `2` |
+| `Result.HasToolCalls()` | `false` |
+| `Result.StoppedAtStepLimit()` | `false` |
+
+Had `MaxSteps` been `1`, the run would stop after step 1 with `HasToolCalls()` and `StoppedAtStepLimit()` both `true`, and `Output()` would hold no final answer.
+
 Reasoning fields such as `reasoning_content` (for example DeepSeek via OpenCode Zen) are preserved on assistant tool-call turns and echoed on follow-up steps.
 
 ## Choose a registration pattern
