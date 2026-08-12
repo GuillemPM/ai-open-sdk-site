@@ -1,8 +1,9 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { HomeLayout } from 'fumadocs-ui/layouts/home';
 import { buttonVariants } from 'fumadocs-ui/components/ui/button';
 import { HeroCode } from '@/components/hero-code';
+import { HeroFrameShell } from '@/components/hero-frame-shell';
+import { HeroMark } from '@/components/hero-mark';
 import { baseOptions, GITHUB_URL } from '@/lib/layout.shared';
 
 const features = [
@@ -41,11 +42,11 @@ export default function Home() {
       {...baseOptions()}
       className="bg-fd-background text-fd-foreground"
     >
-      <section className="relative overflow-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-16 sm:pb-20 lg:pt-20">
-        <div className="aios-hero-stage mx-auto grid max-w-6xl items-center gap-4 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(240px,0.9fr)_minmax(0,1fr)] lg:gap-6 xl:gap-10">
+      <section className="relative overflow-x-hidden px-4 pt-10 pb-12 sm:px-6 sm:pt-16 sm:pb-20 lg:pt-20">
+        <div className="aios-hero-stage mx-auto grid max-w-6xl items-center gap-4 sm:gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(320px,1.2fr)_minmax(0,1fr)] lg:gap-6 xl:gap-10">
           <div className="aios-hero-enter-left relative z-10 order-1 mx-auto max-w-md text-center lg:mx-0 lg:max-w-none lg:text-left">
             <div className="aios-hero-unfold">
-              <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl lg:leading-[1.05]">
+              <h1 className="text-4xl font-semibold tracking-tight whitespace-nowrap sm:text-5xl lg:leading-[1.05] xl:text-[3.5rem]">
                 AI Open SDK
               </h1>
               <p className="mt-2 text-base font-medium tracking-tight text-fd-foreground/80 sm:mt-3 sm:text-xl">
@@ -68,20 +69,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div
-            className="aios-hero-enter-mark relative order-2 mx-auto w-[34vw] max-w-[140px] sm:w-full sm:max-w-[200px] lg:max-w-none"
-            aria-hidden
-          >
-            <div className="aios-hero-mark">
-              <Image
-                src="/hero/mark.png"
-                alt=""
-                width={1024}
-                height={1024}
-                priority
-                className="aios-hero-mark-img"
-              />
-            </div>
+          <div className="aios-hero-enter-mark relative order-2 mx-auto w-[48vw] max-w-[240px] sm:w-full sm:max-w-[340px] lg:max-w-[390px] xl:max-w-[440px]">
+            <HeroMark />
           </div>
 
           <div className="aios-hero-enter-right relative z-10 order-3 mx-auto max-w-md text-center lg:ml-auto lg:max-w-xs lg:text-left">
@@ -100,16 +89,17 @@ export default function Home() {
         </div>
 
         <div className="aios-hero-enter-demo aios-hero-demo relative z-10 mx-auto mt-10 max-w-4xl sm:mt-16">
-          <div className="aios-hero-frame-glow" aria-hidden />
-          <div className="aios-hero-frame p-3 sm:p-4">
-            <div className="aios-atmosphere" aria-hidden>
-              <div className="aios-mesh" />
-              <div className="aios-grain" />
+          <HeroFrameShell>
+            <div className="aios-hero-frame p-3 sm:p-4">
+              <div className="aios-atmosphere" aria-hidden>
+                <div className="aios-mesh" />
+                <div className="aios-grain" />
+              </div>
+              <div className="relative">
+                <HeroCode />
+              </div>
             </div>
-            <div className="relative">
-              <HeroCode />
-            </div>
-          </div>
+          </HeroFrameShell>
 
           <p className="mx-auto mt-5 max-w-2xl text-center text-sm text-fd-muted-foreground">
             Same client API across{' '}

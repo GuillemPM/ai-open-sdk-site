@@ -33,6 +33,15 @@ export function HeroCodeSwitcher({ snippets }: { snippets: Snippet[] }) {
     useState<HeroCapabilityId>('generate-text');
   const [sourceMode, setSourceMode] = useState<HeroSourceMode>('providers');
   const [providerId, setProviderId] = useState<HeroProviderId>('anthropic');
+  // Drives the provider icon carousel: which logo is leaving, which way it goes,
+  // and a key that remounts the pair so a rapid second click restarts the slide.
+  // Null whenever the provider changed by some means other than the arrows, so
+  // that change cross-fades instead of sliding a direction it never had.
+  const [slide, setSlide] = useState<{
+    from: HeroProviderId;
+    direction: -1 | 1;
+    key: number;
+  } | null>(null);
   const [highlighter, setHighlighter] = useState<HighlighterCore | null>(null);
   const [reduceMotion, setReduceMotion] = useState(false);
   // next-themes is undefined until mounted; avoid flashing the wrong Shiki theme.
@@ -103,6 +112,11 @@ export function HeroCodeSwitcher({ snippets }: { snippets: Snippet[] }) {
         (index + direction + availableProviders.length) %
           availableProviders.length
       ];
+    setSlide((previous) => ({
+      from: activeProvider.id,
+      direction,
+      key: (previous?.key ?? 0) + 1,
+    }));
     setProviderId(next.id);
   }
 
@@ -122,7 +136,10 @@ export function HeroCodeSwitcher({ snippets }: { snippets: Snippet[] }) {
                 type="button"
                 role="tab"
                 aria-selected={selected}
-                onClick={() => setCapabilityId(capability.id)}
+                onClick={() => {
+                  setCapabilityId(capability.id);
+                  setSlide(null);
+                }}
                 className={[
                   'relative shrink-0 px-0.5 py-1.5 text-sm font-medium transition-colors',
                   'hover:text-fd-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fd-ring',
@@ -151,22 +168,44 @@ export function HeroCodeSwitcher({ snippets }: { snippets: Snippet[] }) {
                 <button
                   type="button"
                   onClick={() => cycleProvider(-1)}
-                  className={buttonVariants({
+                  className={`${buttonVariants({
                     color: 'ghost',
                     size: 'icon-sm',
-                  })}
+                  })} aios-arrow-press`}
                   aria-label="Previous provider"
                 >
-                  <ChevronLeft />
+                  <span className="aios-arrow-nudge" data-direction={-1}>
+                    <ChevronLeft />
+                  </span>
                 </button>
               ) : null}
 
               <div
-                className="flex size-9 items-center justify-center rounded-md border bg-fd-secondary text-fd-secondary-foreground"
+                className="relative size-9 overflow-hidden rounded-md border bg-fd-secondary text-fd-secondary-foreground"
                 title={activeProvider?.label}
               >
+                {/* The outgoing logo is left mounted at the end of its slide,
+                    where it is off-frame and clipped, rather than torn out on
+                    animationend: one less state change mid-animation. */}
+                {slide ? (
+                  <span
+                    key={`out-${slide.key}`}
+                    className="aios-provider-out absolute inset-0 grid place-items-center"
+                    data-direction={slide.direction}
+                    aria-hidden
+                  >
+                    <ProviderLogo id={slide.from} className="size-4" />
+                  </span>
+                ) : null}
+
                 {activeProvider ? (
-                  <ProviderLogo id={activeProvider.id} className="size-4" />
+                  <span
+                    key={`in-${slide?.key ?? 0}-${activeProvider.id}`}
+                    className="aios-provider-in absolute inset-0 grid place-items-center"
+                    data-direction={slide?.direction ?? 0}
+                  >
+                    <ProviderLogo id={activeProvider.id} className="size-4" />
+                  </span>
                 ) : null}
               </div>
 
@@ -174,13 +213,15 @@ export function HeroCodeSwitcher({ snippets }: { snippets: Snippet[] }) {
                 <button
                   type="button"
                   onClick={() => cycleProvider(1)}
-                  className={buttonVariants({
+                  className={`${buttonVariants({
                     color: 'ghost',
                     size: 'icon-sm',
-                  })}
+                  })} aios-arrow-press`}
                   aria-label="Next provider"
                 >
-                  <ChevronRight />
+                  <span className="aios-arrow-nudge" data-direction={1}>
+                    <ChevronRight />
+                  </span>
                 </button>
               ) : null}
             </div>
@@ -206,9 +247,10 @@ export function HeroCodeSwitcher({ snippets }: { snippets: Snippet[] }) {
             <select
               id="hero-source-mode"
               value={sourceMode}
-              onChange={(event) =>
-                setSourceMode(event.target.value as HeroSourceMode)
-              }
+              onChange={(event) => {
+                setSourceMode(event.target.value as HeroSourceMode);
+                setSlide(null);
+              }}
               className="h-7 appearance-none rounded-md border border-fd-border bg-fd-secondary py-0.5 pr-7 pl-2.5 text-[11px] font-medium text-fd-secondary-foreground outline-none transition-colors hover:bg-fd-accent focus:border-fd-ring"
             >
               {HERO_SOURCE_OPTIONS.map((option) => (

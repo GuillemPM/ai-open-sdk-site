@@ -9,6 +9,23 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Light page background. Declared in @theme so it lands in Tailwind's theme
+   layer: fumadocs' `.dark` block redeclares this same variable unlayered, so it
+   still wins in dark mode. A plain :root rule here would match the same element
+   at the same specificity and, coming later, would leak into dark mode too. */
+@theme {
+  --color-fd-background: #f3f0f3;
+}
+
+/* Docs sit on pure white while the rest of the site uses the warmer tone.
+   Retargeted at the root because `body` is what paints the background, so
+   overriding the token further down would leave the page behind it unchanged.
+   `#nd-docs-layout` is fumadocs' own wrapper, so no marker markup is needed.
+   Excluding .dark keeps this from outranking the dark theme's own value. */
+html:not(.dark):has(#nd-docs-layout) {
+  --color-fd-background: #fff;
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -83,22 +100,6 @@ body {
   }
   to {
     background-position: -20% 0;
-  }
-}
-
-@keyframes aios-glow-wave {
-  0%,
-  100% {
-    opacity: var(--aios-glow-opacity, 0.4);
-    transform: translateX(-50%) translate(0, 0) scale(1);
-  }
-  33% {
-    opacity: calc(var(--aios-glow-opacity, 0.4) * 1.2);
-    transform: translateX(-50%) translate(2.5%, -1.5%) scale(1.04);
-  }
-  66% {
-    opacity: calc(var(--aios-glow-opacity, 0.4) * 0.85);
-    transform: translateX(-50%) translate(-2%, 1.2%) scale(0.97);
   }
 }
 
@@ -191,6 +192,14 @@ body {
   isolation: isolate;
   aspect-ratio: 1;
   width: 100%;
+  /* Springs back on release, matching the provider arrows. */
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.aios-hero-mark:active {
+  transform: scale(0.965);
+  /* Quick to press, unhurried coming back. */
+  transition-duration: 90ms;
 }
 
 .aios-hero-mark::before {
@@ -213,20 +222,22 @@ body {
   width: 100%;
   height: auto;
   display: block;
-  opacity: 0.92;
-  mix-blend-mode: multiply;
-  -webkit-mask-image: radial-gradient(
-    circle at 50% 48%,
-    #000 42%,
-    transparent 78%
-  );
-  mask-image: radial-gradient(circle at 50% 48%, #000 42%, transparent 78%);
 }
 
-.dark .aios-hero-mark-img {
-  opacity: 1;
-  mix-blend-mode: screen;
-  filter: brightness(1.2) contrast(1.05);
+/* One mark per theme. Both assets are opaque plates with no alpha, so each only
+   works against the background it was cut for. Swapped in CSS rather than with
+   Tailwind's dark: utilities because the rule above is unlayered and would beat
+   a layered utility whatever its specificity. */
+.aios-hero-mark-img-dark {
+  display: none;
+}
+
+.dark .aios-hero-mark-img-light {
+  display: none;
+}
+
+.dark .aios-hero-mark-img-dark {
+  display: block;
 }
 
 .dark .aios-hero-mark::before {
@@ -242,62 +253,240 @@ body {
   isolation: isolate;
 }
 
-.aios-hero-frame-glow {
+.aios-hero-frame-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border-radius: 1rem;
+
+  /* The light source. HeroFrameShell drives these from the cursor; these
+     values are the resting source used on touch, under reduced motion, and
+     before hydration. They must match REST_X / REST_Y in that component, which
+     hold the light above the frame rather than on its edge so the resting
+     state is a mid-level glow rather than the brightest one possible. */
+  --aios-light-x: 50%;
+  --aios-light-y: -45%;
+  --aios-light-spec: 0.59;
+
+  /* Ambient floor. A radial gradient holds its last stop outward forever, so
+     these are what the whole ring falls back to once the light is far away:
+     the frame keeps a resting glow instead of going dark. Raise them for more
+     baseline light, lower them for more contrast between lit and unlit.
+     Light mode keeps colour rather than darkness: a black-tinted rim reads as
+     a heavy outline on a pale frame, so these stay in the lavender family
+     built around #eedbfc. */
+  --aios-rim-floor: rgba(188, 158, 214, 0.45);
+  --aios-bloom-floor: rgba(206, 172, 238, 0.18);
+
+  /* Rim line: a white hot spot right where the light lands, cooling through
+     #eedbfc into deeper lavender. White still reads here because the page is
+     #f3f0f3 rather than pure white, so the core is genuinely brighter than
+     what surrounds it. */
+  --aios-rim-core: rgba(255, 255, 255, 1);
+  --aios-rim-mid: rgba(238, 219, 252, 1);
+  --aios-rim-edge: rgba(204, 166, 234, 0.7);
+  --aios-rim-gradient: radial-gradient(
+    ellipse 92% 88% at var(--aios-light-x) var(--aios-light-y),
+    var(--aios-rim-core) 0%,
+    var(--aios-rim-mid) 30%,
+    var(--aios-rim-edge) 60%,
+    var(--aios-rim-floor) 100%
+  );
+
+  /* Bloom: the same ring shape and the same hot spot as the rim, settling to
+     its own floor rather than to nothing. Lavender rather than the near-white
+     of dark mode, because a pale glow on a pale page is nothing at all: here
+     the glow has to carry colour to be seen. White core, then #eedbfc, then
+     progressively deeper tints of that same hue. */
+  --aios-bloom-gradient: radial-gradient(
+    ellipse 92% 88% at var(--aios-light-x) var(--aios-light-y),
+    rgba(255, 255, 255, 1) 0%,
+    rgba(238, 219, 252, 0.95) 14%,
+    rgba(222, 190, 248, 0.7) 30%,
+    rgba(206, 166, 240, 0.45) 50%,
+    rgba(196, 152, 232, 0.26) 68%,
+    var(--aios-bloom-floor) 84%,
+    var(--aios-bloom-floor) 100%
+  );
+}
+
+/* Dark keeps the cinematic version: a hot violet-white core falling to a cool
+   lit edge, bright enough to feed the bloom as additive light. */
+.dark .aios-hero-frame-shell {
+  --aios-rim-floor: rgba(84, 96, 146, 0.6);
+  --aios-bloom-floor: rgba(104, 122, 232, 0.3);
+  --aios-rim-core: rgba(198, 208, 255, 0.95);
+  --aios-rim-mid: rgba(126, 148, 250, 0.6);
+  --aios-rim-edge: rgba(66, 76, 118, 0.5);
+  --aios-bloom-gradient: radial-gradient(
+    ellipse 92% 88% at var(--aios-light-x) var(--aios-light-y),
+    rgba(218, 228, 255, 1) 0%,
+    rgba(150, 170, 255, 0.92) 24%,
+    rgba(112, 132, 250, 0.6) 44%,
+    rgba(88, 106, 220, 0.36) 64%,
+    var(--aios-bloom-floor) 84%,
+    var(--aios-bloom-floor) 100%
+  );
+}
+
+/* Bloom layers: the blur lives on the wrapper and the mask on its ::before,
+   because CSS applies `filter` before `mask` on a single element. Blurring the
+   masked ring directly clips the bleed straight back to the ring's own bounds,
+   which is why it read as a bare border. Blurring from the parent instead
+   blurs the already-masked ring, so the glow is a true blurred copy of the
+   rim: same shape, same gradient, same hot spot. */
+.aios-hero-frame-bloom {
   pointer-events: none;
   position: absolute;
   z-index: 0;
-  left: 50%;
-  top: -5%;
-  width: 94%;
-  height: 86%;
+  border-radius: 1.25rem;
+  /* Painted normally in light mode: `screen` only ever lightens, so against a
+     pale page it has nothing to do and the glow vanishes. */
+  mix-blend-mode: normal;
+}
+
+/* Dark mode can blend additively, so overlapping layers accumulate as light. */
+.dark .aios-hero-frame-bloom {
+  mix-blend-mode: screen;
+}
+
+.aios-hero-frame-bloom::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--aios-bloom-gradient);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+/* Each layer is inset outward past the frame edge: the frame is opaque black
+   and sits above these, so a ring sitting flush at inset 0 loses its whole
+   inner half behind it. Pushing the band out lets the light actually escape. */
+
+/* Tight, bright bloom hugging the rim */
+.aios-hero-frame-bloom-near {
+  inset: -2px;
+  filter: blur(12px);
+  opacity: 1;
+}
+
+.aios-hero-frame-bloom-near::before {
+  padding: 4px;
+}
+
+/* Mid bloom carrying the light out into the black */
+.aios-hero-frame-bloom-far {
+  inset: -6px;
+  filter: blur(34px);
+  opacity: 0.95;
+}
+
+.aios-hero-frame-bloom-far::before {
+  padding: 9px;
+}
+
+/* Wide atmospheric halo */
+.aios-hero-frame-bloom-wide {
+  inset: -14px;
+  filter: blur(64px);
+  opacity: 0.7;
+}
+
+.aios-hero-frame-bloom-wide::before {
+  padding: 16px;
+}
+
+.aios-hero-frame-rim {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 1rem;
+  overflow: visible;
+}
+
+/* The rim line itself: crisp, sitting on top of the frame edge */
+.aios-hero-frame-rim::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--aios-rim-gradient);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+}
+
+/* Soft white backlight: a thin specular line where the light source sits */
+.aios-hero-frame-shell::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  z-index: 3;
+  /* Rides the light along the top edge, but stays on the frame. */
+  left: clamp(10%, var(--aios-light-x), 90%);
+  top: -1px;
+  width: min(34%, 176px);
+  height: 2px;
   transform: translateX(-50%);
-  border-radius: 50%;
-  --aios-glow-opacity: 0.58;
-  background: radial-gradient(
-    ellipse at 50% 28%,
-    color-mix(in oklab, var(--color-fd-foreground) 28%, transparent),
-    color-mix(in oklab, var(--color-fd-foreground) 8%, transparent) 46%,
-    transparent 74%
-  );
-  filter: blur(38px);
-  opacity: var(--aios-glow-opacity);
-  animation: aios-glow-wave 11s ease-in-out infinite;
-  will-change: transform, opacity;
+  background:
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.95) 50%,
+      transparent 100%
+    )
+      center top / 36% 1px no-repeat,
+    linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.28) 24%,
+      rgba(255, 255, 255, 0.6) 50%,
+      rgba(255, 255, 255, 0.28) 76%,
+      transparent 100%
+    )
+      center / 100% 100% no-repeat;
+  filter: blur(0.3px);
+  border-radius: 9999px;
+  /* Fades out as the light leaves the top edge it sits on. Softer in light
+     mode, where it has the page to stand out from rather than black. */
+  opacity: calc(0.7 * var(--aios-light-spec));
+  box-shadow: 0 0 8px -2px rgba(255, 255, 255, 0.28);
 }
 
-.dark .aios-hero-frame-glow {
-  --aios-glow-opacity: 0.72;
-  background: radial-gradient(
-    ellipse at 50% 24%,
-    rgba(255, 255, 255, 0.34),
-    rgba(255, 255, 255, 0.1) 40%,
-    transparent 72%
-  );
-  filter: blur(42px);
-}
-
-/* Hero frame atmosphere: mesh + grain inside a rounded container */
+/* Hero frame: a near-white panel sitting a touch lighter than the page, so the
+   white hot spot on the rim still has somewhere to go. Dark mode gets the pure
+   black stage instead. */
 .aios-hero-frame {
   position: relative;
   z-index: 1;
   overflow: hidden;
   isolation: isolate;
-  border: 1px solid color-mix(in oklab, var(--color-fd-border) 72%, var(--color-fd-foreground) 12%);
+  border: 1px solid rgba(92, 100, 150, 0.12);
   border-radius: 1rem;
-  background: color-mix(in oklab, var(--color-fd-background) 82%, var(--color-fd-foreground) 5%);
+  background: #fbfafd;
   box-shadow:
-    0 1px 0 color-mix(in oklab, var(--color-fd-foreground) 9%, transparent),
-    0 20px 52px -30px rgba(0, 0, 0, 0.45),
-    0 0 88px -18px color-mix(in oklab, var(--color-fd-foreground) 18%, transparent);
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 16px 36px -28px rgba(70, 62, 120, 0.35);
 }
 
 .dark .aios-hero-frame {
-  border-color: color-mix(in oklab, var(--color-fd-border) 48%, white 22%);
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.13),
-    0 1px 0 rgba(255, 255, 255, 0.07),
-    0 24px 60px -32px rgba(0, 0, 0, 0.82),
-    0 0 100px -16px rgba(255, 255, 255, 0.26);
+  border-color: rgba(255, 255, 255, 0.06);
+  background: #000;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .aios-atmosphere {
@@ -308,28 +497,31 @@ body {
   border-radius: inherit;
 }
 
+/* Light haze: a faint #eedbfc wash where the light falls, tinting rather than
+   shading. Anything black-based here just reads as dirt on a pale surface. */
 .aios-mesh {
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(ellipse 78% 60% at 50% -8%, rgba(0, 0, 0, 0.11), transparent 62%),
-    radial-gradient(ellipse 48% 42% at 10% 30%, rgba(0, 0, 0, 0.06), transparent 55%),
-    radial-gradient(ellipse 44% 40% at 90% 28%, rgba(0, 0, 0, 0.05), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 50% 78%, rgba(0, 0, 0, 0.04), transparent 65%);
+    radial-gradient(ellipse 82% 52% at 50% -8%, rgba(214, 178, 244, 0.22), transparent 62%),
+    radial-gradient(ellipse 60% 46% at 12% 22%, rgba(214, 178, 244, 0.1), transparent 60%),
+    radial-gradient(ellipse 60% 46% at 88% 22%, rgba(214, 178, 244, 0.1), transparent 60%),
+    radial-gradient(ellipse 74% 50% at 50% 108%, rgba(176, 138, 208, 0.05), transparent 62%);
 }
 
+/* Faint volumetric haze: violet-blue + white light falling off into black */
 .dark .aios-mesh {
   background:
-    radial-gradient(ellipse 84% 60% at 50% -12%, rgba(255, 255, 255, 0.22), transparent 58%),
-    radial-gradient(ellipse 48% 42% at 14% 30%, rgba(255, 255, 255, 0.08), transparent 55%),
-    radial-gradient(ellipse 44% 40% at 86% 28%, rgba(255, 255, 255, 0.07), transparent 55%),
-    radial-gradient(ellipse 55% 45% at 50% 80%, rgba(255, 255, 255, 0.045), transparent 65%);
+    radial-gradient(ellipse 82% 52% at 50% -8%, rgba(150, 164, 255, 0.16), transparent 60%),
+    radial-gradient(ellipse 56% 38% at 50% 0%, rgba(255, 255, 255, 0.07), transparent 55%),
+    radial-gradient(ellipse 60% 46% at 12% 22%, rgba(120, 140, 255, 0.05), transparent 60%),
+    radial-gradient(ellipse 60% 46% at 88% 22%, rgba(120, 140, 255, 0.05), transparent 60%);
 }
 
 .aios-grain {
   position: absolute;
   inset: 0;
-  opacity: 0.4;
+  opacity: 0.05;
   mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-repeat: repeat;
@@ -337,8 +529,141 @@ body {
 }
 
 .dark .aios-grain {
-  opacity: 0.2;
+  opacity: 0.16;
   mix-blend-mode: soft-light;
+}
+
+.dark .aios-hero-frame-shell::after {
+  opacity: calc(0.85 * var(--aios-light-spec));
+}
+
+/* Provider icon carousel. Pressing next advances the strip, so the outgoing
+   logo leaves to the left and the incoming one arrives from the right. */
+/* Longhand on purpose: an `animation` shorthand that omits the name gets
+   collapsed to `animation: none` by the CSS compiler, taking the duration and
+   fill-mode with it, which leaves both logos parked on top of each other. */
+.aios-provider-in,
+.aios-provider-out {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  animation-fill-mode: both;
+}
+
+/* Resting states, so the pair still reads correctly even if the fill-mode is
+   ever lost again: the outgoing logo is invisible unless it is mid-animation. */
+.aios-provider-out {
+  opacity: 0;
+}
+
+.aios-provider-in {
+  /* A provider change with no direction (a tab or source switch) has no side to
+     come from, so it simply resolves in place. */
+  animation-name: aios-provider-fade;
+}
+
+.aios-provider-in[data-direction='1'] {
+  animation-name: aios-provider-in-next;
+}
+
+.aios-provider-in[data-direction='-1'] {
+  animation-name: aios-provider-in-prev;
+}
+
+.aios-provider-out[data-direction='1'] {
+  animation-name: aios-provider-out-next;
+}
+
+.aios-provider-out[data-direction='-1'] {
+  animation-name: aios-provider-out-prev;
+}
+
+@keyframes aios-provider-fade {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes aios-provider-in-next {
+  from {
+    opacity: 0;
+    transform: translateX(115%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes aios-provider-in-prev {
+  from {
+    opacity: 0;
+    transform: translateX(-115%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes aios-provider-out-next {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(-115%);
+  }
+}
+
+@keyframes aios-provider-out-prev {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(115%);
+  }
+}
+
+/* Reduced motion: the outgoing logo still has to clear out, but by fading
+   where it stands instead of travelling. */
+@keyframes aios-provider-out-still {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Arrow press: the chevron holds a shove the way the strip will travel for as
+   long as the button is down, then springs back on release. Driven by :active
+   rather than an animation, because a click animation only starts on release. */
+.aios-arrow-nudge {
+  display: grid;
+  place-items: center;
+  transition: transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.aios-arrow-nudge[data-direction='-1'] {
+  --aios-nudge-shift: -3px;
+}
+
+.aios-arrow-nudge[data-direction='1'] {
+  --aios-nudge-shift: 3px;
+}
+
+.aios-arrow-press:active .aios-arrow-nudge {
+  transform: translateX(var(--aios-nudge-shift, 0)) scale(0.82);
+  /* Quick to press, unhurried springing back. */
+  transition-duration: 90ms;
 }
 
 .aios-code-panel {
@@ -378,19 +703,34 @@ body {
   .aios-hero-enter-right,
   .aios-hero-enter-demo,
   .aios-hero-unfold,
-  .aios-hero-frame-glow,
+  .aios-hero-frame-rim::before,
   .aios-code-panel,
   .aios-code-panel::before {
     animation: none;
   }
 
+  /* Keep the press readable, but land on it instantly rather than travelling. */
+  .aios-arrow-nudge,
+  .aios-hero-mark {
+    transition: none;
+  }
+
+  /* The icon still needs to resolve to its new logo, so it cross-fades in
+     place rather than sliding. */
+  .aios-provider-in,
+  .aios-provider-in[data-direction='1'],
+  .aios-provider-in[data-direction='-1'] {
+    animation-name: aios-fade-in;
+    animation-duration: 160ms;
+  }
+
+  .aios-provider-out {
+    animation-name: aios-provider-out-still;
+    animation-duration: 160ms;
+  }
+
   .aios-hero-unfold {
     -webkit-mask-image: none;
     mask-image: none;
-  }
-
-  .aios-hero-frame-glow {
-    opacity: var(--aios-glow-opacity, 0.4);
-    transform: translateX(-50%);
   }
 }
