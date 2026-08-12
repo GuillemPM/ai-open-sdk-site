@@ -4,6 +4,6 @@ Result: Codeunit "AIOS Generate Result";
 ApiKey: SecretText;
 begin
     Result := Client.GenerateText(
-        Anthropic.Model('claude-sonnet-4-5', ApiKey),
+        Anthropic.Model('claude-fable-5', ApiKey),
         'Hello');
 end;

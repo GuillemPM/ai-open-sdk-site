@@ -4,7 +4,7 @@ Result: Codeunit "AIOS Generate Result";
 ApiKey: SecretText;
 begin
     Result := Client.GenerateText(
-        ZAI.Model('glm-5', ApiKey),
+        ZAI.Model('glm-5.2', ApiKey),
         'Translate this posting message to Spanish');
     Message(Result.Output());
 end;
