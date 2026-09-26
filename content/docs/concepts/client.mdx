@@ -28,6 +28,8 @@ Returns `"AIOS Generate Result"` and Errors on failure.
 | `StoppedAtStepLimit()` | Tool loop reached `MaxSteps` with pending tool calls |
 | `GetResponseCalls()`, `GetStepCount()`, `GetTotalInputTokens()`, `GetTotalOutputTokens()` | Full multi-step run |
 
+`GetResponseCalls()` and the step and token totals include retry attempts. A tool-loop result can stop successfully with pending tool calls, but the overload that also binds a `RecRef` errors when the step limit prevents a final structured response.
+
 ## Image generation
 
 - `GenerateImage(Model, Prompt)`
@@ -45,6 +47,8 @@ Integration events on `"AIOS Client"`:
 - `OnBeforeLanguageModelCall`
 - `OnAfterLanguageModelCall`
 - `OnAfterGenerate` (success only)
+
+`OnBeforeGenerate` runs before the prompt and pending attachments are added to history. Changes made there to the prompt, attachments, system message, or output schema are included in the request.
 
 ## Internal try helpers
 

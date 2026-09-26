@@ -37,4 +37,4 @@ Flat RecRef binding fills record fields from the validated JSON. Given the same 
 
 Use schema-validated JSON when you need a stable contract across versions.
 
-With a tool loop, structured output and RecRef binding run on the final non-tool-call step only.
+With a tool loop, structured output and RecRef binding run on the final non-tool-call step only. If `MaxSteps` is reached while tool calls are still pending, the normal tool-loop overload returns the partial result with `StoppedAtStepLimit() = true`. A tool-loop overload that binds a `RecRef` raises an error, because it cannot bind a final structured response.

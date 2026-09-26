@@ -30,6 +30,8 @@ With a system message:
 
 <include lang="al" meta='title="GenerateTextSystem.al"'>samples/anthropic/GenerateTextSystem.al</include>
 
+Anthropic extended thinking is preserved across tool-loop turns, including thinking signatures and redacted-thinking blocks. When thinking is enabled, unsupported sampling options are omitted and a compatibility warning is added; the provider also raises `max_tokens` when the thinking budget needs more room.
+
 ## Factory API
 
 | Procedure | Behavior |

@@ -19,3 +19,5 @@ Public surface (v0.1, may change before 1.0):
 Errors on failure. Extension code uses these public procedures; `Try*` helpers stay internal to the toolkit app.
 
 Full concept notes: [Client API](/docs/concepts/client).
+
+When reusing a request, `SetPrompt` adds a new user turn once, and current system and output instructions are applied when provider messages are built. The `RecRef` overloads always bind the supplied record, even when the request previously used another output schema.

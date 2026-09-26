@@ -1,5 +1,5 @@
-[EventSubscriber(ObjectType::Codeunit, Codeunit::"AIOS Tool Set", 'OnExecuteTool', '', false, false)]
-local procedure OnExecuteTool(
+[EventSubscriber(ObjectType::Codeunit, Codeunit::"AIOS Tool Set", 'OnBeforeExecuteTool', '', false, false)]
+local procedure OnBeforeExecuteTool(
     Name: Text;
     Arguments: JsonObject;
     var ResultText: Text;

@@ -11,7 +11,9 @@ Retriable errors:
 
 - Rate limit
 - Timeout
-- Provider unavailable
+- Provider unavailable, including HTTP 529 and other transient 5xx responses
+
+HTTP 501 and 505 responses stay `Unknown` and are not retried. Retry attempts are included in `GetResponseCalls()` and the aggregated token and step accessors on the result.
 
 Shared helper: `"AIOS Retry"`, used for both text and image generation.
 

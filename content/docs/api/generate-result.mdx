@@ -19,4 +19,6 @@ Key accessors on `"AIOS Generate Result"`:
 
 Token, finish-reason, provider, and warning helpers are also available for observability.
 
+Warnings can describe provider compatibility adjustments. Retry attempts are included in response-call and aggregate token accessors. A normal tool loop may return with pending tool calls at the step limit; a structured `RecRef` tool loop errors when no final structured response exists.
+
 See [Tools](/docs/concepts/tools) for multi-step behavior.

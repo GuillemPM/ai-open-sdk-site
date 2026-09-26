@@ -18,8 +18,8 @@ AI calls are side effects. With Mock you assert on prompts, structured output, a
 ## Setup
 
 1. Depend on **AI Open SDK** (core).
-2. Queue the next response (or error / tool call) on the factory.
-3. Call `"AIOS Client"` with `Mock.Model(...)` or `Mock.ImageModel(...)`.
+2. Queue the next response (or error / tool call) on the factory before binding `Mock.Model(...)` or `Mock.ImageModel(...)`.
+3. Call `"AIOS Client"` with the bound model.
 
 <include lang="al" meta='title="GenerateText.al"'>samples/mock/GenerateText.al</include>
 
@@ -36,5 +36,7 @@ Assert.AreEqual('Hello from mock', Result.Output(), 'Unexpected output');
 ```
 
 Image: `Mock.SetNextImageBase64(...)` then `Client.GenerateImage(Mock.ImageModel(...), ...)`.
+
+For tool-loop tests, `SetNextToolCallThenResponse` queues a tool call first and the final response on the next turn. The tool-call turn has no final response text unless you use its overload with explicit tool-turn text.
 
 Full factory surface: [Mock provider](/docs/providers/mock). Contribution rule: mock-provider tests cover provider or client logic you touch. See [Contributing](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/CONTRIBUTING.md).

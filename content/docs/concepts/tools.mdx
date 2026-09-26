@@ -45,9 +45,11 @@ The client:
 | Model requests a registered tool | Tool runs; result is appended; loop continues |
 | Model requests an unknown tool name | Generation fails with an invalid-request error |
 | Tool `Execute` returns `false` | `ResultText` is sent back as the tool result; the loop continues |
-| Last step still has tool calls | Success; `HasToolCalls()` and `StoppedAtStepLimit()` are `true`; a warning of type `tool_loop_step_limit` is added |
+| Last step still has tool calls | The normal tool-loop overload returns success with `HasToolCalls()` and `StoppedAtStepLimit()` set to `true`, and adds a `tool_loop_step_limit` warning. The overload that also binds a `RecRef` errors because no final structured response is available. |
 
 Structured output and RecRef binding run on the final non-tool-call step only.
+
+Before executing a step, the client validates every requested tool name. An unknown name prevents the whole step from running. Arguments are also validated without coercing malformed JSON to `{}`; invalid arguments are returned to the model as a tool result and are not executed.
 
 ### A run, end to end
 
@@ -67,9 +69,9 @@ The result reflects the whole run, not just the last call:
 | `Result.HasToolCalls()` | `false` |
 | `Result.StoppedAtStepLimit()` | `false` |
 
-Had `MaxSteps` been `1`, the run would stop after step 1 with `HasToolCalls()` and `StoppedAtStepLimit()` both `true`, and `Output()` would hold no final answer.
+Had `MaxSteps` been `1`, the normal overload would stop after step 1 with `HasToolCalls()` and `StoppedAtStepLimit()` both `true`, and `Output()` would hold no final answer. With a `RecRef` output, the same situation raises a generation error instead of returning an unfilled record. Values below `1` are treated as `1`.
 
-Reasoning fields such as `reasoning_content` (for example DeepSeek via OpenCode Zen) are preserved on assistant tool-call turns and echoed on follow-up steps.
+Provider-owned assistant content is preserved on tool-call turns and replayed on follow-up steps. This includes `reasoning_content` from compatible Chat Completions providers and Anthropic thinking blocks when the provider requires them.
 
 ## Choose a registration pattern
 
@@ -77,10 +79,10 @@ Reasoning fields such as `reasoning_content` (for example DeepSeek via OpenCode 
 |---|---|---|
 | Interface tool | `ToolSet.Add(Tool)` | Reusable single-tool codeunits |
 | Handler pack | `ToolSet.Use(Handler)` | Several tools behind one object ID |
-| Named + event | `ToolSet.Add(Name, Description, Schema)` | Definitions at the call site; execute via `OnExecuteTool` |
+| Named + event | `ToolSet.Add(Name, Description, Schema)` | Definitions at the call site; execute via `OnBeforeExecuteTool` |
 | Definition object | `ToolSet.Add(ToolDefinition(...))` | Same as named Add, from a JSON definition |
 
-You can combine interface tools and named tools on the same `"AIOS Tool Set"`. Execution order for a name is: interface tool, then handler (if set), then `OnExecuteTool`.
+You can combine interface tools and named tools on the same `"AIOS Tool Set"`. Execution order for a name is: interface tool, then handler (if set), then `OnBeforeExecuteTool`.
 
 ## Interface tools
 
@@ -105,9 +107,9 @@ Implement `"AIOS Tool Handler"` when several tools should share one object ID.
 
 <include lang="al" meta='title="UseHandler.al"'>samples/tools/UseHandler.al</include>
 
-## Named tools and OnExecuteTool
+## Named tools and OnBeforeExecuteTool
 
-Register a definition on the tool set and handle execution in an `OnExecuteTool` subscriber on `"AIOS Tool Set"`.
+Register a definition on the tool set and handle execution in an `OnBeforeExecuteTool` subscriber on `"AIOS Tool Set"`. Set `Handled := true` after matching the name.
 
 <include lang="al" meta='title="AddNamed.al"'>samples/tools/AddNamed.al</include>
 
@@ -117,7 +119,7 @@ Equivalent registration from a definition object:
 
 Subscriber shape:
 
-<include lang="al" meta='title="OnExecuteTool.al"'>samples/tools/OnExecuteTool.al</include>
+<include lang="al" meta='title="OnBeforeExecuteTool.al"'>samples/tools/OnBeforeExecuteTool.al</include>
 
 Set `Handled := true` after handling the name. Set `Succeeded` to the tool outcome. When `Handled` stays `false` for a registered name, generation fails with a missing-executor error.
 
@@ -131,7 +133,7 @@ Use `GenerateText(Model, Request)` when you want one model call per invocation. 
 |---|---|
 | `Request.SetTools(ToolSet)` | Publishes tool definitions on the request |
 | `Request.EnsureMessagesFromPrompt()` | Builds the message list from system + prompt when empty |
-| `Request.AppendAssistantToolCalls(...)` | Adds the assistant turn that requested tools |
+| `Request.AppendAssistantToolCalls(...)` | Adds the assistant turn that requested tools; the response overload also preserves provider-owned content |
 | `ToolSet.Execute(Name, Arguments, ResultText)` | Runs one tool by name |
 | `Request.AppendToolResult(Id, Name, Content)` | Adds the tool result message correlated by call id |
 
@@ -153,7 +155,7 @@ Use `GenerateText(Model, Request)` when you want one model call per invocation. 
 |---|---|
 | `Add(Tool)` | Registers an `"AIOS Tool"`; duplicate names error |
 | `Use(Handler)` | Sets the handler and registers all `GetDefinitions()` entries |
-| `Add(Name, Description, Parameters)` | Registers a named tool for handler or `OnExecuteTool` |
+| `Add(Name, Description, Parameters)` | Registers a named tool for handler or `OnBeforeExecuteTool` |
 | `Add(Definition)` | Registers from `{ name, description, parameters }` |
 | `ToolDefinition(Name, Description, Parameters)` | Builds one definition object |
 | `Register(Name, Description, Parameters)` | Same registration as named `Add` |
@@ -170,9 +172,8 @@ Toolkit samples in `"AIOS Usage Example"`:
 |---|---|
 | `RunTools_AddInterfaceTool` | `Add(Tool)` |
 | `RunTools_UseHandler` | `Use(Handler)` |
-| `RunTools_AddNamed_OnExecuteTool` | Named Add + `OnExecuteTool` |
-| `RunTools_AddDefinition` | `Add(ToolDefinition(...))` |
-| `RunTools_MixInterfaceAndNamed` | Interface + named on one set |
+| `RunTools_NamedEscapeHatch` | Named Add + `OnBeforeExecuteTool` |
+| `RunTools_MixAddAndUse` | Interface + handler on one set |
 | `RunTools_ManualContinue` | Manual step control |
 
 Interactive UI: page `"AIOS Toolkit Demo"`.
