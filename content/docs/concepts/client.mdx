@@ -1,20 +1,26 @@
 ---
 title: Client API
-description: GenerateText, GenerateImage, results, and lifecycle events.
+description: Generate text and images from Business Central AL.
 ---
 
 `"AIOS Client"` is the public entry point.
 
 ## Text generation
 
-Overloads:
+For a simple prompt:
 
-- `GenerateText(Model, Prompt)`
-- `GenerateText(Model, System, Prompt)`
-- `GenerateText(Model, Request)`: full options via `"AIOS Chat Request"`
-- `GenerateText(Model, Request, OutputRecRef)`: flat RecRef binding
-- `GenerateText(Model, Request, ToolSet, MaxSteps)`: automatic tool loop
-- `GenerateText(Model, Request, ToolSet, MaxSteps, OutputRecRef)`
+```al
+Result := Client.GenerateText(Model, 'Summarize this customer note');
+Message := Result.Output();
+```
+
+Use an `"AIOS Chat Request"` when the call needs more than a prompt:
+
+- `GenerateText(Model, System, Prompt)` adds a system instruction.
+- `GenerateText(Model, Request)` uses the prompt and options on the request.
+- `GenerateText(Model, Request, OutputRecRef)` writes structured output to a record.
+- `GenerateText(Model, Request, ToolSet, MaxSteps)` lets the model use tools before answering.
+- `GenerateText(Model, Request, ToolSet, MaxSteps, OutputRecRef)` combines tools with record output.
 
 Returns `"AIOS Generate Result"` and Errors on failure.
 
@@ -22,13 +28,13 @@ Returns `"AIOS Generate Result"` and Errors on failure.
 
 | Method | Meaning |
 |---|---|
-| `Output()`, `Body()`, `Headers()`, `HttpStatusCode()` | Response payload |
-| Token / finish / provider helpers | Observability for the last step |
-| `HasToolCalls()` / `GetToolCalls()` | Tool calls on the last model response |
-| `StoppedAtStepLimit()` | Tool loop reached `MaxSteps` with pending tool calls |
-| `GetResponseCalls()`, `GetStepCount()`, `GetTotalInputTokens()`, `GetTotalOutputTokens()` | Full multi-step run |
+| `Output()` | Generated text or validated JSON |
+| `HasToolCalls()` / `GetToolCalls()` | Tool calls returned by the model |
+| `StoppedAtStepLimit()` | The tool loop needs more steps to finish |
+| `GetStepCount()` | Number of generation steps |
+| `GetTotalInputTokens()`, `GetTotalOutputTokens()` | Token usage for the generation |
 
-`GetResponseCalls()` and the step and token totals include retry attempts. A tool-loop result can stop successfully with pending tool calls, but the overload that also binds a `RecRef` errors when the step limit prevents a final structured response.
+See [Generation result](/docs/api/generate-result) for the complete result surface.
 
 ## Image generation
 
@@ -48,10 +54,6 @@ Integration events on `"AIOS Client"`:
 - `OnAfterLanguageModelCall`
 - `OnAfterGenerate` (success only)
 
-`OnBeforeGenerate` runs before the prompt and pending attachments are added to history. Changes made there to the prompt, attachments, system message, or output schema are included in the request.
-
-## Internal try helpers
-
-`TryGenerateText` / `TryGenerate` / `TryGenerateWithTools` / `TryGenerateImage` are internal soft-fail helpers used by this app's tests and demos. Extension code uses the public `Generate*` methods.
+Use `OnBeforeGenerate` to adjust a request before it is sent, and `OnAfterGenerate` to react after a successful call. The language-model events are useful when an extension needs to observe or customize an individual model call.
 
 See also [API: AIOS Client](/docs/api/client).

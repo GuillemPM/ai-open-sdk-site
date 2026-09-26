@@ -1,24 +1,23 @@
 ---
 title: AIOS Generate Result
-description: Accessors for text generation results.
+description: Read generated text, usage, and tool-call information.
 ---
 
-Key accessors on `"AIOS Generate Result"`:
+`"AIOS Generate Result"` contains the result of a text generation call.
+
+## Common accessors
 
 | Method | Purpose |
 |---|---|
 | `Output()` | Final text or validated JSON |
-| `Body()` | Raw response body |
-| `Headers()` | Response headers |
-| `HttpStatusCode()` | HTTP status |
-| `HasToolCalls()` / `GetToolCalls()` | Tool calls on the last model response |
-| `StoppedAtStepLimit()` | `true` when the tool loop reached `MaxSteps` with pending tool calls |
-| `GetResponseCalls()` | Every model HTTP call in the run |
-| `GetStepCount()` | Number of model HTTP calls |
-| `GetTotalInputTokens()` / `GetTotalOutputTokens()` | Aggregated usage across steps |
+| `HasToolCalls()` / `GetToolCalls()` | Tool calls returned by the model |
+| `StoppedAtStepLimit()` | Whether a tool loop stopped before the model returned a final answer |
+| `GetStepCount()` | Number of generation steps |
+| `GetTotalInputTokens()` / `GetTotalOutputTokens()` | Total token usage for the generation |
+| `HttpStatusCode()` | HTTP status returned by the provider |
 
-Token, finish-reason, provider, and warning helpers are also available for observability.
+`Body()` and `Headers()` are available when you need provider response details while diagnosing a failed integration. Token, finish-reason, provider, and warning helpers are also available.
 
-Warnings can describe provider compatibility adjustments. Retry attempts are included in response-call and aggregate token accessors. A normal tool loop may return with pending tool calls at the step limit; a structured `RecRef` tool loop errors when no final structured response exists.
+When tools are enabled, inspect `HasToolCalls()` and `StoppedAtStepLimit()` before treating the output as a final answer.
 
 See [Tools](/docs/concepts/tools) for multi-step behavior.

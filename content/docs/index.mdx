@@ -23,7 +23,7 @@ Provider selection is a dependency and factory change. Callers keep using `"AIOS
 
 ## Packaging
 
-**Core** ships as one Business Central app. Each live provider is a separate extension. Install only what you call. HTTP goes directly to the provider; this is not a wrapper around System.AI.
+**Core** ships as one Business Central app. Each live provider is a separate extension. Install only the providers your extension uses.
 
 | App | Role |
 |---|---|
@@ -33,7 +33,7 @@ Provider selection is a dependency and factory change. Callers keep using `"AIOS
 | **AI Open SDK OpenCode Zen** | OpenCode Zen gateway |
 | **AI Open SDK OpenAI Compatible** | Any Chat Completions base URL |
 
-Some providers also pull **AI Open SDK Provider Utils** (shared Chat Completions helpers). Application code does not call Provider Utils directly.
+The provider apps include any shared dependencies they need. Your extension calls the provider factory and `"AIOS Client"` directly.
 
 ## When to use it
 

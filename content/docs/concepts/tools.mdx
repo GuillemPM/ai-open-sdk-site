@@ -3,7 +3,7 @@ title: Tools
 description: Let models call AL procedures through AIOS Tool Set.
 ---
 
-Tools are AL procedures the model can invoke during generation. A **tool call** is a request from the model; a **tool result** is the text your procedure returns. The SDK maps both through the provider chat format and keeps them on the conversation.
+Tools are AL procedures the model can invoke during generation. A **tool call** is a request from the model; a **tool result** is the text your procedure returns.
 
 ## Core objects
 
@@ -29,27 +29,25 @@ Pass a tool set into `GenerateText` with a step budget:
 
 The client:
 
-1. Attaches the tool set to the request
-2. Calls the model
-3. When the response contains tool calls, executes each tool and appends results to the request
-4. Calls the model again
-5. Repeats until the model returns a final answer or `MaxSteps` is reached
+1. Sends the prompt and tool definitions to the model.
+2. Executes any tools requested by the model.
+3. Sends the tool results back to the model.
+4. Repeats until the model returns a final answer or `MaxSteps` is reached.
 
-`MaxSteps` values below 1 are treated as 1. Each model HTTP call counts as one step.
+`MaxSteps` values below 1 are treated as 1. Each generation step counts once toward the limit.
 
 ### Outcomes
 
 | Condition | Result |
 |---|---|
 | Model returns text (no tool calls) | Success; `Output()` is the final answer |
-| Model requests a registered tool | Tool runs; result is appended; loop continues |
+| Model requests a registered tool | Tool runs and the loop continues |
 | Model requests an unknown tool name | Generation fails with an invalid-request error |
-| Tool `Execute` returns `false` | `ResultText` is sent back as the tool result; the loop continues |
-| Last step still has tool calls | The normal tool-loop overload returns success with `HasToolCalls()` and `StoppedAtStepLimit()` set to `true`, and adds a `tool_loop_step_limit` warning. The overload that also binds a `RecRef` errors because no final structured response is available. |
+| Tool `Execute` returns `false` | The tool result is sent back to the model and the loop continues |
+| Last step still has tool calls | The result reports `HasToolCalls()` and `StoppedAtStepLimit()` as `true` |
 
 Structured output and RecRef binding run on the final non-tool-call step only.
 
-Before executing a step, the client validates every requested tool name. An unknown name prevents the whole step from running. Arguments are also validated without coercing malformed JSON to `{}`; invalid arguments are returned to the model as a tool result and are not executed.
 
 ### A run, end to end
 
@@ -69,9 +67,7 @@ The result reflects the whole run, not just the last call:
 | `Result.HasToolCalls()` | `false` |
 | `Result.StoppedAtStepLimit()` | `false` |
 
-Had `MaxSteps` been `1`, the normal overload would stop after step 1 with `HasToolCalls()` and `StoppedAtStepLimit()` both `true`, and `Output()` would hold no final answer. With a `RecRef` output, the same situation raises a generation error instead of returning an unfilled record. Values below `1` are treated as `1`.
-
-Provider-owned assistant content is preserved on tool-call turns and replayed on follow-up steps. This includes `reasoning_content` from compatible Chat Completions providers and Anthropic thinking blocks when the provider requires them.
+Had `MaxSteps` been `1`, the loop would stop after step 1 and the result would indicate that more steps were needed. Values below `1` are treated as `1`.
 
 ## Choose a registration pattern
 
@@ -121,7 +117,7 @@ Subscriber shape:
 
 <include lang="al" meta='title="OnBeforeExecuteTool.al"'>samples/tools/OnBeforeExecuteTool.al</include>
 
-Set `Handled := true` after handling the name. Set `Succeeded` to the tool outcome. When `Handled` stays `false` for a registered name, generation fails with a missing-executor error.
+Set `Handled := true` after handling the name and set `Succeeded` to the tool outcome.
 
 ## Manual step control
 
@@ -133,7 +129,7 @@ Use `GenerateText(Model, Request)` when you want one model call per invocation. 
 |---|---|
 | `Request.SetTools(ToolSet)` | Publishes tool definitions on the request |
 | `Request.EnsureMessagesFromPrompt()` | Builds the message list from system + prompt when empty |
-| `Request.AppendAssistantToolCalls(...)` | Adds the assistant turn that requested tools; the response overload also preserves provider-owned content |
+| `Request.AppendAssistantToolCalls(...)` | Adds the assistant turn that requested tools |
 | `ToolSet.Execute(Name, Arguments, ResultText)` | Runs one tool by name |
 | `Request.AppendToolResult(Id, Name, Content)` | Adds the tool result message correlated by call id |
 
@@ -144,9 +140,8 @@ Use `GenerateText(Model, Request)` when you want one model call per invocation. 
 | `Result.Output()` | Final text, or validated JSON when structured output applies |
 | `Result.HasToolCalls()` | Last model response still contains tool calls |
 | `Result.GetToolCalls()` | List of `"AIOS Tool Call"` from that response |
-| `Result.StoppedAtStepLimit()` | Loop ended because `MaxSteps` was reached with pending tool calls |
-| `Result.GetStepCount()` | Number of model HTTP calls in the run |
-| `Result.GetResponseCalls()` | Per-call metadata for each model request |
+| `Result.StoppedAtStepLimit()` | Loop ended because `MaxSteps` was reached before a final answer |
+| `Result.GetStepCount()` | Number of generation steps |
 | `Result.GetTotalInputTokens()` / `GetTotalOutputTokens()` | Aggregated usage across steps |
 
 ## Tool Set reference
@@ -159,8 +154,8 @@ Use `GenerateText(Model, Request)` when you want one model call per invocation. 
 | `Add(Definition)` | Registers from `{ name, description, parameters }` |
 | `ToolDefinition(Name, Description, Parameters)` | Builds one definition object |
 | `Register(Name, Description, Parameters)` | Same registration as named `Add` |
-| `SetHandler(Handler)` | Sets the executor for named tools (`Use` already calls this) |
-| `Execute(Name, Arguments, ResultText)` | Runs the tool; returns success from `Execute` |
+| `SetHandler(Handler)` | Sets the executor for named tools |
+| `Execute(Name, Arguments, ResultText)` | Runs the tool and returns whether it succeeded |
 | `GetDefinitions()` | Combined definitions for interface + named tools |
 | `Count()` / `HasTool(Name)` | Inspection helpers |
 

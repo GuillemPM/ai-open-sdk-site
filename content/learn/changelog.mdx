@@ -13,27 +13,17 @@ Initial usable release (pre-1.0, public APIs may still change).
 - Providers: Anthropic, OpenAI, OpenCode Zen, Mock
 - Structured output via `"AIOS Schema"` + optional RecRef binding
 - Tools via `"AIOS Tool Set"` (handler registration and per-tool codeunits)
-- Automatic tool loop with step limit and response-call aggregation
-- Shared retry / backoff (`"AIOS Retry"`)
+- Automatic tool loops with a configurable step limit
+- Retries for temporary provider failures
 - Lifecycle integration events on the client
 - SecretText API keys end-to-end
 - Example demo page and usage codeunits
 
-### Not yet shipped
-
-- Azure OpenAI adapter
-- System.AI platform provider
-- OpenTelemetry / GenAI telemetry
-
-Semver stability commitments begin at **v1.0**. See [Governance](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/GOVERNANCE.md).
+Public APIs are still pre-1.0 and may change.
 
 ## Unreleased
 
-The current development line also includes safer and more reusable multi-step generation:
-
-- Transient 529 and 5xx provider responses retry as unavailable errors, while 501 and 505 remain unknown.
-- Tool steps validate all names before execution, preserve malformed arguments as tool results, and leave reusable request history on failure.
-- Tool-loop results aggregate response calls and retry usage. Structured `RecRef` output errors when the step limit prevents a final response.
-- Reused requests apply current prompts, system messages, and output instructions without duplicating history.
-- OpenAI reasoning requests use `max_completion_tokens`; Anthropic thinking content is replayed across tool turns with provider compatibility warnings where needed.
-- Mock and Examples now model realistic tool turns and deterministic structured, image, and tool-loop responses.
+- Improved tool calling across multiple model steps.
+- Requests can be reused for new prompts and output schemas.
+- More consistent structured output and provider behavior.
+- More deterministic Mock responses for text, images, and tools.

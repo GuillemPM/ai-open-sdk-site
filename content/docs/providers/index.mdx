@@ -14,9 +14,8 @@ AI Open SDK splits into a **core** library and **provider extensions**. Your app
 | **AI Open SDK OpenAI** | `"AIOS OpenAI"` → chat and image models |
 | **AI Open SDK OpenCode Zen** | `"AIOS OpenCode Zen"` → Zen gateway |
 | **AI Open SDK OpenAI Compatible** | `"AIOS OpenAI Compatible"` → any Chat Completions base URL |
-| **AI Open SDK Provider Utils** | Shared Chat Completions helpers (pulled by some providers; not for app code) |
 
-Each provider extension depends on **AI Open SDK** (core). OpenAI, OpenCode Zen, and OpenAI Compatible also depend on Provider Utils. Your extension depends on core and on each provider app you install.
+Each provider extension depends on **AI Open SDK** (core). Your extension depends on core and on each provider app you install.
 
 ```json
 "dependencies": [
@@ -63,4 +62,4 @@ Use the published App Ids from AppSource or your symbol feed. Install only the p
 - [Mock](/docs/providers/mock)
 - [Custom providers](/docs/providers/custom)
 
-**Also available:** `"AIOS OpenAI Compatible"` for any Chat Completions base URL (no dedicated page yet). **Planned:** Azure OpenAI, System.AI platform provider.
+`"AIOS OpenAI Compatible"` is also available for any Chat Completions base URL.

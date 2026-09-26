@@ -1,9 +1,11 @@
 ---
 title: AIOS Client
-description: Public procedures on Codeunit AIOS Client.
+description: Call text and image models from AL.
 ---
 
-Public surface (v0.1, may change before 1.0):
+Use `"AIOS Client"` to send prompts to a language or image model. Choose a short overload for a simple call, or create an `"AIOS Chat Request"` when you need options such as structured output or tools.
+
+## Text generation
 
 | Procedure | Returns |
 |---|---|
@@ -16,8 +18,8 @@ Public surface (v0.1, may change before 1.0):
 | `GenerateImage(Model, Prompt)` | `"AIOS Generate Image Result"` |
 | `GenerateImage(Model, Request)` | `"AIOS Generate Image Result"` |
 
-Errors on failure. Extension code uses these public procedures; `Try*` helpers stay internal to the toolkit app.
+The client raises an error when generation fails. A successful text call returns `"AIOS Generate Result"`; a successful image call returns `"AIOS Generate Image Result"`.
 
-Full concept notes: [Client API](/docs/concepts/client).
+For examples and guidance, see [Client API](/docs/concepts/client).
 
-When reusing a request, `SetPrompt` adds a new user turn once, and current system and output instructions are applied when provider messages are built. The `RecRef` overloads always bind the supplied record, even when the request previously used another output schema.
+Use the `Request` overload when you want to keep prompts, options, tools, and output schema together. A request can be reused for another prompt, and the `RecRef` overload binds the result to the record passed to that call.

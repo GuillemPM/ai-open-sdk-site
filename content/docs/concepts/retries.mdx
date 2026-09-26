@@ -1,20 +1,16 @@
 ---
 title: Retries
-description: Shared backoff for rate limits, timeouts, and unavailable providers.
+description: Configure retries for temporary provider failures.
 ---
 
-Retries are configured on the request:
+The SDK can retry temporary provider failures before returning an error. Configure the limit on the request:
 
 - `GetMaxRetries` / `SetMaxRetries` (default **2**)
 
-Retriable errors:
+Retries cover temporary failures such as:
 
 - Rate limit
 - Timeout
-- Provider unavailable, including HTTP 529 and other transient 5xx responses
+- Provider unavailable
 
-HTTP 501 and 505 responses stay `Unknown` and are not retried. Retry attempts are included in `GetResponseCalls()` and the aggregated token and step accessors on the result.
-
-Shared helper: `"AIOS Retry"`, used for both text and image generation.
-
-Tune retries per call when you know a provider is flaky, and keep defaults conservative for interactive UI paths.
+The default is suitable for most calls. Lower it for interactive pages where a quick error is preferable, or raise it for background jobs where a temporary provider failure should be tolerated.

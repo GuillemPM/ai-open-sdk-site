@@ -5,21 +5,19 @@ description: Test AI-dependent AL without network or API keys.
 
 `"AIOS Mock"` ships in **AI Open SDK** (core). It is an in-memory provider for text and image generation: no HTTP and no API keys.
 
-Core and provider logic that you cover in CI should pass with Mock. Live API keys stay out of the pipeline.
+Use it in automated tests and local development to keep AI-dependent code deterministic.
 
-## Why it matters
+With Mock you can test:
 
-AI calls are side effects. With Mock you assert on prompts, structured output, and tool loops deterministically:
-
-- Tests run without secrets or network
-- Failures stay reproducible
-- Provider outages do not block CI
+- Run tests without secrets or network access
+- Keep failures reproducible
+- Structured output and tool loops without a live provider
 
 ## Setup
 
 1. Depend on **AI Open SDK** (core).
-2. Queue the next response (or error / tool call) on the factory before binding `Mock.Model(...)` or `Mock.ImageModel(...)`.
-3. Call `"AIOS Client"` with the bound model.
+2. Queue the response, error, or tool call you want to test.
+3. Bind `Mock.Model(...)` or `Mock.ImageModel(...)` and call `"AIOS Client"`.
 
 <include lang="al" meta='title="GenerateText.al"'>samples/mock/GenerateText.al</include>
 
@@ -37,6 +35,4 @@ Assert.AreEqual('Hello from mock', Result.Output(), 'Unexpected output');
 
 Image: `Mock.SetNextImageBase64(...)` then `Client.GenerateImage(Mock.ImageModel(...), ...)`.
 
-For tool-loop tests, `SetNextToolCallThenResponse` queues a tool call first and the final response on the next turn. The tool-call turn has no final response text unless you use its overload with explicit tool-turn text.
-
-Full factory surface: [Mock provider](/docs/providers/mock). Contribution rule: mock-provider tests cover provider or client logic you touch. See [Contributing](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/CONTRIBUTING.md).
+For tool-loop tests, `SetNextToolCallThenResponse` queues a tool call followed by a final response. See [Mock provider](/docs/providers/mock) for the available test responses.

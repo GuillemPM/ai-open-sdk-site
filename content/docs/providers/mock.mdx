@@ -31,9 +31,9 @@ Configure the next outcome on the factory before binding a model and calling `Ge
 |---|---|
 | `SetNextResponse(Content)` | Next text call returns this content |
 | `SetNextError(ErrorType, ErrorMessage)` | Next call fails with the given error |
-| `SetFailuresBeforeSuccess(Count)` | Fail `Count` times, then succeed (retry tests) |
+| `SetFailuresBeforeSuccess(Count)` | Fail `Count` times, then succeed |
 | `SetNextToolCall(Id, Name, ArgumentsJson)` | Next call returns one tool call |
-| `SetNextToolCallThenResponse(...)` | Tool call on the first step, then a final text response; an overload can set text on the tool-call turn |
+| `SetNextToolCallThenResponse(...)` | Tool call on the first step, then a final text response |
 | `SetNextImageBase64(Base64, MediaType)` | Next image call returns one image |
 | `Model(ModelId)` | Returns `"AIOS Language Model"` (no API key) |
 | `ImageModel(ModelId)` | Returns `"AIOS Image Model"` (no API key) |
