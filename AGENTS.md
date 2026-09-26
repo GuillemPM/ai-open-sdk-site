@@ -50,6 +50,15 @@ Embed AL with `<include lang="al" meta='title="File.al"'>samples/.../File.al</in
 
 Before Next.js / App Router edits, read `node_modules/next/dist/docs/` (see block above).
 
+## Documentation harness
+
+Before editing content, read [docs-harness.md](docs-harness.md). It defines the
+consumer audience and the boundary between public SDK behavior and
+implementation details.
+
 ## Verify
 
-After structural content or site changes: `pnpm lint` and `pnpm build`.
+After content changes, run `pnpm docs:check` and `pnpm build`. Run `pnpm lint`
+for site-code changes too. A successful build does not replace the consumer
+review: ask whether an AL developer can use the page without reading the SDK
+source.

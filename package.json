@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "docs:check": "node scripts/docs-check.mjs"
   },
   "dependencies": {
     "@shikijs/magic-move": "4.4.1",

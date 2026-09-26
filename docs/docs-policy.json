@@ -1,0 +1,12 @@
+{
+  "forbiddenTerms": [
+    { "term": "TryGenerate", "reason": "internal helper" },
+    { "term": "reasoning_content", "reason": "provider wire field" },
+    { "term": "max_completion_tokens", "reason": "provider wire field" },
+    { "term": "tool_loop_step_limit", "reason": "internal warning identifier" },
+    { "term": "provider-owned", "reason": "implementation detail" },
+    { "term": "response-call", "reason": "implementation detail" },
+    { "term": "Governance", "reason": "maintainer material" },
+    { "term": "OpenTelemetry", "reason": "unrelated roadmap material" }
+  ]
+}

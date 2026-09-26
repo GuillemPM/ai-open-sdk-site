@@ -8,6 +8,9 @@ description: >-
 
 # Review docs
 
+Read `docs-harness.md` first. Review from the perspective of an extension
+developer who does not know the SDK implementation.
+
 ## Clarity
 
 - [ ] Title and description match the page
@@ -35,6 +38,15 @@ description: >-
 - [ ] Object names match existing docs (`"AIOS Client"`, `"AIOS Tool Set"`, etc.)
 - [ ] Provider pages follow the same shape as existing provider MDX
 - [ ] Links to related concepts / API / providers work
+
+## Consumer boundary
+
+- [ ] The page teaches a user task, not an internal code change
+- [ ] No local or internal helper names appear in consumer guidance
+- [ ] No provider wire fields, serialization details, or maintainer workflow
+- [ ] Retry, tool-loop, and provider behavior is described only when it changes
+      what the extension developer must do or handle
+- [ ] The page can stand on public APIs and linked samples without source-code knowledge
 
 ## Report
 

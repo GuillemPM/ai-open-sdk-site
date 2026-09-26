@@ -50,9 +50,10 @@ def main() -> None:
         json.dumps(
             {
                 "additional_context": (
-                    "Content edit under content/: keep AL in colocated .al files and "
-                    "embed with <include>; update the nearest meta.json when adding "
-                    "or renaming pages."
+                    "Content edit under content/: keep the consumer audience from "
+                    "docs-harness.md; keep AL in colocated .al files and embed with "
+                    "<include>; update the nearest meta.json when adding or renaming "
+                    "pages; run pnpm docs:check."
                 )
             }
         )
