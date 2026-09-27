@@ -2,7 +2,6 @@ codeunit 50101 "My App Tools" implements "AIOS Tool Handler"
 {
     procedure GetDefinitions(): JsonArray
     var
-        ToolSet: Codeunit "AIOS Tool Set";
         Schema: Codeunit "AIOS Schema";
         Definitions: JsonArray;
         Fields: List of [JsonObject];
@@ -10,7 +9,7 @@ codeunit 50101 "My App Tools" implements "AIOS Tool Handler"
         Fields.Add(Schema.Field('a', Schema.Number()));
         Fields.Add(Schema.Field('b', Schema.Number()));
         Definitions.Add(
-            ToolSet.ToolDefinition(
+            Schema.ToolDefinition(
                 'add_numbers',
                 'Adds two numbers (a and b) and returns the sum as text.',
                 Schema.Object(Fields)));
