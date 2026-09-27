@@ -50,9 +50,11 @@ def main() -> None:
         json.dumps(
             {
                 "additional_context": (
-                    "Content edit under content/: keep AL in colocated .al files and "
-                    "embed with <include>; update the nearest meta.json when adding "
-                    "or renaming pages."
+                    "Content edit under content/: keep the consumer audience from "
+                    "docs-harness.md; keep AL in colocated .al files and embed with "
+                    "<include>; update the nearest meta.json when adding or renaming "
+                    "pages; put {/* api-owner: \"AIOS X\" */} above procedure tables; "
+                    "run pnpm docs:check and pnpm docs:api-review."
                 )
             }
         )

@@ -18,3 +18,4 @@ alwaysApply: false
 - One idea per file; prefer small focused snippets over full apps
 - Hero snippets live under `content/al/hero/` and are wired from `lib/hero-examples.ts`
 - If prose describes an API, a sample (or link to one) must demonstrate it
+- Samples may only call public members of the pinned SDK (`docs/public-api.json`). Fragments may use the conventional variable names in `apiAliases` (`docs/docs-policy.json`) without declaring them

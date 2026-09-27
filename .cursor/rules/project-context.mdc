@@ -10,7 +10,7 @@ This repo is the **AI Open SDK** website (Business Central / AL), not the SDK so
 - Pillars: `/` product, `/docs` reference, `/learn` tutorials
 - Package manager: **pnpm** only
 - **Docs-first**: optimize for professional documentation; touch site code only to support content
-- Never invent AL SDK APIs. Use existing samples or the upstream toolkit.
+- Never invent AL SDK APIs. Verify against the pinned toolkit commit (`docs/sdk-source.json`, `docs/public-api.json`); `pnpm docs:check` enforces ownership.
 - Docs copy must sound human (no em dashes or spaced hyphen asides). See `docs-voice.mdc`.
 - Durable guidance lives in `AGENTS.md` (outside the Next.js auto-block) and `.cursor/rules/`
-- Skills: `write-docs`, `add-doc-page`, `review-docs`
+- Skills: `write-docs`, `add-doc-page`, `review-docs`, `review-api`

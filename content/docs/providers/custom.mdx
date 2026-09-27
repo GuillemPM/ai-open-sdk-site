@@ -14,12 +14,12 @@ A custom provider is a separate app that depends on **AI Open SDK** (core) and r
 | `"AIOS Provider"` | Factory surface (`GetName`, bind helpers) matching shipped providers |
 | `"AIOS Chat Format"` | Your HTTP message/tool JSON differs from the built-in formats |
 
-Core already ships reusable formats:
+The SDK already ships reusable formats:
 
-- `"AIOS OpenAI Compatible Format"`
-- `"AIOS Anthropic Format"`
+- `"AIOS Chat Completions Format"` in **AI Open SDK Provider Utils**, for Chat Completions endpoints
+- `"AIOS Anthropic Format"` in **AI Open SDK Anthropic**, for the Anthropic Messages format
 
-Reuse one of those when your endpoint matches that schema. Implement `"AIOS Chat Format"` when the wire shape is different.
+Reuse one of those when your endpoint matches that format. Implement `"AIOS Chat Format"` when your endpoint uses a different format.
 
 ## Extension layout
 
@@ -46,6 +46,4 @@ Downstream apps depend on core plus your provider app, then call your factory an
 
 <include lang="al" meta='title="Consumer.al"'>samples/custom/Consumer.al</include>
 
-## Contract stability
-
-Changes to `"AIOS Language Model"`, `"AIOS Chat Request"` / response tables, and structured-output validation are high impact. Additional provider adapters are additive. See [Governance](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/GOVERNANCE.md).
+The public model and request interfaces are the contract between your provider and its consumers. Keep provider-specific details inside the provider app so consumers can use your factory with the same `"AIOS Client"` APIs as the built-in providers.

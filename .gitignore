@@ -43,3 +43,6 @@ next-env.d.ts
 # local package store / generated
 .pnpm-store
 .source
+
+# SDK checkout fetched by pnpm docs:api-sync --fetch
+/.cache

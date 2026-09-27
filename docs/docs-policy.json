@@ -1,0 +1,68 @@
+{
+  "forbiddenTerms": [
+    {
+      "term": "TryGenerate",
+      "reason": "internal helper"
+    },
+    {
+      "term": "reasoning_content",
+      "reason": "provider wire field"
+    },
+    {
+      "term": "max_completion_tokens",
+      "reason": "provider wire field"
+    },
+    {
+      "term": "tool_loop_step_limit",
+      "reason": "internal warning identifier"
+    },
+    {
+      "term": "provider-owned",
+      "reason": "implementation detail"
+    },
+    {
+      "term": "response-call",
+      "reason": "implementation detail"
+    },
+    {
+      "term": "Governance",
+      "reason": "maintainer material"
+    },
+    {
+      "term": "OpenTelemetry",
+      "reason": "unrelated roadmap material"
+    }
+  ],
+  "apiAliases": {
+    "$comment": "Conventional variable names in sample fragments that do not declare their variables. A declaration in the sample itself always wins.",
+    "Client": "AIOS Client",
+    "Request": "AIOS Chat Request",
+    "Result": "AIOS Generate Result",
+    "ImageResult": "AIOS Generate Image Result",
+    "ToolSet": "AIOS Tool Set",
+    "Handler": "AIOS Tool Handler",
+    "Schema": "AIOS Schema",
+    "Mock": "AIOS Mock",
+    "Model": "AIOS Language Model",
+    "Call": "AIOS Tool Call",
+    "PrivacyNotice": "AIOS Privacy Notice",
+    "Anthropic": "AIOS Anthropic",
+    "OpenAI": "AIOS OpenAI",
+    "Compatible": "AIOS OpenAI Compatible",
+    "Zen": "AIOS OpenCode Zen"
+  },
+  "apiExceptions": [
+    {
+      "path": "content/al/hero/generate-text/",
+      "objects": [
+        "AIOS DeepSeek",
+        "AIOS Gemini",
+        "AIOS MiniMax",
+        "AIOS Moonshot",
+        "AIOS XAI",
+        "AIOS ZAI"
+      ],
+      "reason": "The landing hero shows provider factories that are not in the pinned SDK. They are not documented as reference API. docs:check prints each one as a warning until the hero or the SDK changes."
+    }
+  ]
+}

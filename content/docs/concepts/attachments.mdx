@@ -1,0 +1,68 @@
+---
+title: Attachments
+description: Send item pictures, PDFs, and text files to a model with Request.Attach.
+---
+
+Attach files to a request when the model should read an image or document along with the prompt. Attachments go with the next user message.
+
+## Describe an item picture
+
+`Item.Picture` is a media set, so pass the media id of the picture you want:
+
+<include lang="al" meta='title="ItemPicture.al"'>samples/attachments/ItemPicture.al</include>
+
+The model must accept images. Choose a vision-capable model id from your provider.
+
+## Attach from a stream or blob
+
+For files that are not already in Tenant Media, pass the content with its media type and a file name:
+
+<include lang="al" meta='title="AttachStream.al"'>samples/attachments/AttachStream.al</include>
+
+## Attach overloads
+
+{/* api-owner: "AIOS Chat Request" */}
+
+| Overload | Use for |
+|---|---|
+| `Attach(MediaId)` | A picture from a `Media` or `MediaSet` field, such as `Item.Picture.Item(1)` |
+| `Attach(MediaId, Filename)` | The same, with an explicit file name |
+| `Attach(TenantMedia)` / `Attach(TenantMedia, Filename)` | A `"Tenant Media"` record you already loaded. The media type comes from the record |
+| `Attach(InStream, MediaType, Filename)` | Content from a stream, such as an uploaded file |
+| `Attach(TempBlob, MediaType, Filename)` | Content in a `"Temp Blob"` |
+| `Attach(Base64, MediaType, Filename)` | Base64 text without a `data:` prefix |
+
+`MediaType` is a standard type such as `image/png`, `application/pdf`, or `text/plain`. Text types (`text/...`) are sent to the model as plain text, with the file name as a heading.
+
+`HasAttachments()` tells you whether files are waiting for the next message, and `ClearAttachments()` removes them.
+
+## Provider support
+
+| Content | Anthropic | OpenAI, OpenCode Zen, OpenAI Compatible |
+|---|---|---|
+| Images (`image/...`) | Yes | Yes, when the model supports vision |
+| PDF (`application/pdf`) | Yes | Sent as a file. Support depends on the endpoint and model |
+| Text (`text/...`) | Yes | Yes |
+| Other types | Error that names the media type | Sent as a file. Support depends on the endpoint and model |
+
+Anthropic raises the error when `GenerateText` runs, not when you call `Attach`. For the other providers, check the model documentation before relying on file input.
+
+## Limits
+
+| Limit | Value |
+|---|---|
+| Attachments per request | 10 |
+| Size per attachment | About 7.5 MB |
+| Empty content or empty media type | Not allowed |
+
+`Attach` raises an error as soon as a limit is exceeded, before any model call. Providers may apply lower limits of their own.
+
+## Attachments in a conversation
+
+Attachments go with the prompt you set with `SetPrompt`. If you attach without setting a new prompt and the history ends with a user message, the attachment joins that message instead. See [Conversations](/docs/concepts/conversations).
+
+## Test without a provider
+
+`"AIOS Mock"` ignores attachments and accepts any media type, so you can run the code that builds the request in a test:
+
+<include lang="al" meta='title="AttachText.al"'>samples/attachments/AttachText.al</include>

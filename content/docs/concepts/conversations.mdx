@@ -1,0 +1,51 @@
+---
+title: Conversations
+description: Send follow-up prompts with earlier turns, and restore a conversation from your own storage.
+---
+
+A model does not remember earlier calls. To ask a follow-up question, send the earlier turns with it. `"AIOS Chat Request"` keeps those turns for you as long as you reuse the same request.
+
+## Follow-up prompts
+
+Reuse one request, add the model reply after each call, then set the next prompt:
+
+<include lang="al" meta='title="FollowUp.al"'>samples/conversations/FollowUp.al</include>
+
+What the second call sends:
+
+| Turn | Role | Content |
+|---|---|---|
+| 1 | user | Order 101005 ships late. Draft a two-line apology to the customer. |
+| 2 | assistant | The first reply, added with `AppendAssistantMessage` |
+| 3 | user | Make it more formal and mention the new date, 14 March. |
+
+Rules that keep the history correct:
+
+- **Add the reply yourself.** The client does not add the model reply to the request. Call `Request.AppendAssistantMessage(Result.Output())` after each call you want the model to remember.
+- **Each prompt is added once.** `SetPrompt` adds the text as the next user turn. Calling `GenerateText` again without a new `SetPrompt` does not repeat it.
+- **The system message is not a turn.** It is sent first on every call, and the current value is used. Changing it with `SetSystemMessage` applies to the next call.
+- **Options stay on the request.** Temperature, output schema, and the other [request options](/docs/concepts/request-options) apply to every call until you change or clear them.
+
+## Restore earlier turns
+
+When the conversation lives in your own table, rebuild it on a new request with `AppendUserMessage` and `AppendAssistantMessage`, then set the new prompt:
+
+<include lang="al" meta='title="RestoreHistory.al"'>samples/conversations/RestoreHistory.al</include>
+
+You can also send history without a new prompt. If the last turn is a user message added with `AppendUserMessage`, the model answers it.
+
+## Save and load the history
+
+`GetMessages` returns every turn as a `JsonArray`, and `SetMessages` replaces the history with one. Use them to keep a conversation across sessions:
+
+<include lang="al" meta='title="SaveHistory.al"'>samples/conversations/SaveHistory.al</include>
+
+The saved history holds the text of each turn. Attachment content is not included, so attach files again on the new request if the model still needs them. `ClearMessages` removes every turn and keeps the options.
+
+## Keep conversations short
+
+Every call sends the whole history, so token usage grows with each turn. Check `Result.GetTotalInputTokens()` as the conversation grows. For long chats, keep only the recent turns, or ask the model for a summary and start a new request with that summary as the first user message.
+
+## Tools in a conversation
+
+When you pass a tool set, the tool calls and tool results of that run are added to the history, so the next prompt on the same request can refer to them. See [Tools](/docs/concepts/tools).

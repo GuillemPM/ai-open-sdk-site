@@ -13,16 +13,17 @@ Initial usable release (pre-1.0, public APIs may still change).
 - Providers: Anthropic, OpenAI, OpenCode Zen, Mock
 - Structured output via `"AIOS Schema"` + optional RecRef binding
 - Tools via `"AIOS Tool Set"` (handler registration and per-tool codeunits)
-- Automatic tool loop with step limit and response-call aggregation
-- Shared retry / backoff (`"AIOS Retry"`)
+- Automatic tool loops with a configurable step limit
+- Retries for temporary provider failures
 - Lifecycle integration events on the client
 - SecretText API keys end-to-end
 - Example demo page and usage codeunits
 
-### Not yet shipped
+Public APIs are still pre-1.0 and may change.
 
-- Azure OpenAI adapter
-- System.AI platform provider
-- OpenTelemetry / GenAI telemetry
+## Unreleased
 
-Semver stability commitments begin at **v1.0**. See [Governance](https://github.com/GuillemPM/AL-AI-Toolkit/blob/main/GOVERNANCE.md).
+- Improved tool calling across multiple model steps.
+- Requests can be reused for new prompts and output schemas.
+- More consistent structured output and provider behavior.
+- More deterministic Mock responses for text, images, and tools.

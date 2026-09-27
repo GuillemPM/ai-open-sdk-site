@@ -35,6 +35,4 @@ Flat RecRef binding fills record fields from the validated JSON. Given the same 
 | `Summary` | `Shipping was late, but support resolved it quickly.` |
 | `Score` | `3.5` |
 
-Use schema-validated JSON when you need a stable contract across versions.
-
-With a tool loop, structured output and RecRef binding run on the final non-tool-call step only.
+Use schema-validated JSON when you need a stable contract between your extension and the model. When tools are enabled, set `MaxSteps` high enough for the model to finish using tools and return the structured response.

@@ -5,11 +5,14 @@ description: Build JSON Schema for structured output.
 
 `"AIOS Schema"` builds JSON Schema objects used with `Request.SetOutput(...)`.
 
+{/* api-owner: "AIOS Schema" */}
+
 Common helpers:
 
 - `String()`, `Number()`, `Boolean()`, ...
 - `Field(Name, Schema)`
 - `Object(Fields)`
+- `ToolDefinition(Name, Description, Parameters)` builds a `{ name, description, parameters }` tool definition (see [Tools](/docs/concepts/tools))
 
 Example:
 

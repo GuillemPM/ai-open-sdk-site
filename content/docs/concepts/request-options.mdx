@@ -1,0 +1,81 @@
+---
+title: Request Options
+description: Control temperature, length, timeouts, reasoning, and stop sequences on an AIOS Chat Request.
+---
+
+Short `GenerateText` overloads use provider defaults. When you need control over the reply, put the prompt on an `"AIOS Chat Request"`, set the options you care about, and pass the request to the client.
+
+## Set options on the request
+
+<include lang="al" meta='title="SetOptions.al"'>samples/request-options/SetOptions.al</include>
+
+`"AIOS Chat Request"` is a temporary table. Declare it as a local `Record` variable; it never writes to the database.
+
+Options you do not set are left to the provider. Each tuning option has a matching `Clear...` procedure (for example `ClearTemperature` or `ClearStopSequences`) that returns it to the default.
+
+## Options
+
+{/* api-owner: "AIOS Chat Request" */}
+
+| Procedure | Effect | Default |
+|---|---|---|
+| `SetSystemMessage(Text)` | Instructions the model follows for the whole conversation | None |
+| `SetPrompt(Text)` | The user message for the next call | None |
+| `SetTemperature(Decimal)` | Randomness. Lower is more predictable. `0` is sent as `0` | Provider default |
+| `SetMaxTokens(Integer)` | Upper limit on the reply length. Values of `0` or less are ignored | Provider default |
+| `SetTimeout(Integer)` | Time limit for each model call, in milliseconds | `120000` |
+| `SetMaxRetries(Integer)` | Extra attempts after a temporary failure. `0` disables retries | `2` |
+| `SetReasoning(Enum "AIOS Reasoning Effort")` | How much the model thinks before answering | `ProviderDefault` |
+| `AddStopSequence(Text)` | Text that ends the reply when the model produces it | None |
+| `SetTopP(Decimal)` | Nucleus sampling | Provider default |
+| `SetTopK(Integer)` | Top-K sampling | Provider default |
+| `SetPresencePenalty(Decimal)` | Discourages repeating topics | Provider default |
+| `SetFrequencyPenalty(Decimal)` | Discourages repeating words | Provider default |
+| `SetSeed(Integer)` | Asks the provider for repeatable sampling | Provider default |
+
+Structured output (`SetOutput`), tools (`SetTools`), and attachments (`Attach`) also live on the request. See [Structured output](/docs/concepts/structured-output), [Tools](/docs/concepts/tools), and [Attachments](/docs/concepts/attachments).
+
+## Provider support
+
+Every provider accepts the system message, prompt, temperature, max tokens, timeout, retries, reasoning, and stop sequences. The sampling options differ:
+
+| Option | Anthropic | OpenAI, OpenCode Zen, OpenAI Compatible |
+|---|---|---|
+| `SetTopP` | Yes | Yes |
+| `SetTopK` | Yes | Not sent |
+| `SetPresencePenalty` / `SetFrequencyPenalty` | Not sent | Yes |
+| `SetSeed` | Not sent | Yes |
+
+An option that is not sent does not raise an error. Set only what the provider you target supports, so the same request behaves the same way in tests and in production.
+
+## Reasoning
+
+`SetReasoning` asks a reasoning-capable model to think before it answers. Use it for multi-step comparisons or calculations, and leave it at `ProviderDefault` for short rewrites and summaries, where it only adds latency and cost.
+
+<include lang="al" meta='title="Reasoning.al"'>samples/request-options/Reasoning.al</include>
+
+| Value | Meaning |
+|---|---|
+| `ProviderDefault` | Send nothing and let the model decide |
+| `None` | Do not ask for reasoning |
+| `Minimal`, `Low`, `Medium`, `High`, `XHigh` | Increasing reasoning effort |
+
+How each provider applies the level:
+
+- **OpenAI:** every level is passed through as the matching effort. Use a model that supports reasoning.
+- **OpenCode Zen and OpenAI Compatible:** only low, medium, and high are available. `Minimal` becomes low and `XHigh` becomes high, with a warning.
+- **Anthropic:** reasoning turns on extended thinking with a budget taken from `SetMaxTokens` (for example about 30 percent at `Medium`). While thinking is on, temperature and Top K are dropped, and Top P is kept only between 0.95 and 1. If the budget does not fit under your max tokens, the limit is raised and a warning is added.
+
+## Read warnings
+
+When the SDK adjusts or drops an option for the provider, it records a warning instead of failing. Read them from the result while you tune a request, or log them:
+
+<include lang="al" meta='title="ReadWarnings.al"'>samples/request-options/ReadWarnings.al</include>
+
+Each warning is a JSON object with a `type`, the `feature` it concerns, and a readable `message`.
+
+## Reuse a request
+
+A request keeps its options between calls. Call `SetPrompt` again to send a new user message with the same system message and settings. The prompt is added to the request history, so a reused request is also how you build a conversation. See [Conversations](/docs/concepts/conversations).
+
+To start over, use `Clear(Request)`.

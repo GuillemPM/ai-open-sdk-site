@@ -7,6 +7,12 @@ description: >-
 
 # Add a doc page
 
+## 0. Audit the feature
+
+Run the checklist in `docs/feature-audit.md`: search existing pages and
+samples, and confirm with `pnpm docs:api-review --name <Name>` that each API
+is public on the object you will name.
+
 ## 1. Choose the tree
 
 | Goal | Path |
@@ -40,5 +46,7 @@ Nest folders by name (`"concepts"`), never extract with `"...concepts"`. Do not 
 ## 5. Verify
 
 - Confirm nav renders under `/docs` or `/learn`
-- Run `pnpm build` if structure or site wiring changed
+- Put `{/* api-owner: "AIOS X" */}` above any procedure, method, or overload table
+- Run `pnpm docs:check` and `pnpm docs:api-review`, then ask for a `review-api` pass
+- Run `pnpm build`
 - Scan new MDX for human punctuation (see `docs-voice.mdc`). No em dashes or spaced hyphen asides.

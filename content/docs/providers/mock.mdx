@@ -25,13 +25,15 @@ Your test (or app) extension depends on **AI Open SDK** (core).
 
 ## Queue behavior
 
-Configure the next outcome on the factory before `GenerateText` / `GenerateImage`:
+Configure the next outcome on the factory before binding a model and calling `GenerateText` / `GenerateImage`:
+
+{/* api-owner: "AIOS Mock" */}
 
 | Procedure | Behavior |
 |---|---|
 | `SetNextResponse(Content)` | Next text call returns this content |
 | `SetNextError(ErrorType, ErrorMessage)` | Next call fails with the given error |
-| `SetFailuresBeforeSuccess(Count)` | Fail `Count` times, then succeed (retry tests) |
+| `SetFailuresBeforeSuccess(Count)` | Fail `Count` times, then succeed |
 | `SetNextToolCall(Id, Name, ArgumentsJson)` | Next call returns one tool call |
 | `SetNextToolCallThenResponse(...)` | Tool call on the first step, then a final text response |
 | `SetNextImageBase64(Base64, MediaType)` | Next image call returns one image |

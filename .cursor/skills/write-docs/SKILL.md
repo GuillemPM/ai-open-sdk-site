@@ -10,6 +10,12 @@ description: >-
 
 Audience: Business Central AL developers adopting AI Open SDK.
 
+Write for an extension developer consuming the published apps. Do not write a
+maintainer changelog disguised as a guide. Public docs may explain observable
+behavior, but should omit local or internal helpers, provider wire fields,
+serialization, implementation history, and repository governance. Read
+`docs-harness.md` before starting.
+
 ## Checklist
 
 1. **Promise.** Frontmatter `description` states one outcome.
@@ -20,6 +26,17 @@ Audience: Business Central AL developers adopting AI Open SDK.
 6. **Cross-links.** Related concepts, API pages, providers.
 7. **Skim test.** Headings alone outline the page; no fluff or emojis.
 8. **Human punctuation.** No em dashes, en dashes, or spaced hyphen asides. Prefer commas, periods, parentheses, or colons. See `docs-voice.mdc`.
+9. **API ownership.** Run the feature audit in `docs/feature-audit.md` before
+   naming an API. Qualify calls with their owner (`Schema.ToolDefinition(...)`)
+   and put `{/* api-owner: "AIOS X" */}` above procedure tables.
+10. **Consumer boundary.** If a detail does not help an extension developer
+   install, call, configure, test, or handle the SDK, remove it or link to the
+   appropriate maintainer documentation.
+
+## Verify
+
+Run `pnpm docs:check`, `pnpm docs:api-review`, and `pnpm build`. Changes that
+add or edit an API claim need an API review with the `review-api` skill.
 
 ## Include pattern
 

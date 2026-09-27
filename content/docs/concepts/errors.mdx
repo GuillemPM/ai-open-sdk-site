@@ -1,0 +1,83 @@
+---
+title: Error Handling
+description: Know which failures GenerateText raises, and handle them without breaking the page or job.
+---
+
+`GenerateText` and `GenerateImage` raise an AL error when generation fails. There is no status flag to check on the happy path: if the call returns, the result is usable.
+
+## Soft-fail in your extension
+
+When a failure should not stop the user, wrap the call in your own `[TryFunction]` and decide what to show:
+
+<include lang="al" meta='title="SoftFail.al"'>samples/errors/SoftFail.al</include>
+
+Keep the try function small. Only the `GenerateText` call belongs inside it, so a failure in your own code is not mistaken for a provider failure.
+
+The error text names the error type, then the message from the provider or the SDK:
+
+```text
+Generation failed (Authentication Failed): invalid api key
+```
+
+Image calls use the same shape, starting with `Image generation failed`.
+
+## Error types
+
+Every generation failure carries one `"AIOS Error Type"` value. Use it to decide whether to ask for a new key, try later, or fix the request.
+
+| Error type | Typical cause | Retried automatically |
+|---|---|---|
+| `RateLimited` | The provider throttled the account | Yes |
+| `Timeout` | The call exceeded the request timeout, or the provider could not be reached | Yes |
+| `ProviderUnavailable` | The provider had a temporary server failure | Yes |
+| `AuthenticationFailed` | The provider rejected the API key, or the key lacks access to the model | No |
+| `InvalidRequest` | The provider rejected the request, the privacy notice is not approved, the model asked for an unknown tool, or `Max Tokens` cut the reply off before any text | No |
+| `ParseFailed` | The reply was empty or unreadable, did not match the output schema, or the tool loop ended before structured output | No |
+| `NoImageGenerated` | An image call returned no images | No |
+| `Unknown` | Anything the SDK cannot classify | No |
+
+Retried types only raise after the retry budget is used up. See [Retries](/docs/concepts/retries).
+
+## Privacy notice not approved
+
+Live providers send data outside Business Central, so each provider app registers a privacy notice. Until an administrator agrees to it on the **Privacy Notices Status** page, every call to that provider fails with `InvalidRequest`:
+
+```text
+Generation failed (Invalid Request): Privacy notice AIOS-ANTHROPIC is not approved. An administrator must agree on the Privacy Notices Status page before data can be sent to this AI provider.
+```
+
+The check never opens a dialog, so it is safe in job queue entries and web service calls. To show a friendlier message before calling, check the approval yourself with `"AIOS Privacy Notice"`:
+
+<include lang="al" meta='title="CheckPrivacyNotice.al"'>samples/errors/CheckPrivacyNotice.al</include>
+
+| Provider app | Notice id | Name on Privacy Notices Status |
+|---|---|---|
+| AI Open SDK Anthropic | `AIOS-ANTHROPIC` | AI Open SDK Anthropic |
+| AI Open SDK OpenAI | `AIOS-OPENAI` | AI Open SDK OpenAI |
+| AI Open SDK OpenCode Zen | `AIOS-OPENCODE-ZEN` | AI Open SDK OpenCode Zen |
+| AI Open SDK OpenAI Compatible | `AIOS-OPENAI-COMPAT` | AI Open SDK OpenAI Compatible |
+
+`"AIOS Mock"` sends nothing over the network and needs no approval.
+
+On a setup page, `"AIOS Privacy Notice".ConfirmApproval(...)` takes the same three arguments and asks the current user to agree. Call it only from interactive pages, outside a write transaction.
+
+## Errors before the call
+
+Some problems raise before any model call, from the factory or the request:
+
+| Situation | When it raises |
+|---|---|
+| Model id or API key is empty | `Factory.Model(...)` |
+| OpenAI Compatible base URL is empty | `"AIOS OpenAI Compatible".Model(...)` |
+| Attachment is empty, too large, or one too many | `Request.Attach(...)` |
+| Two tools share a name | `ToolSet.Add(...)` |
+
+Use `BindLanguageModel` on the factory when you prefer a `Boolean` instead of an error while checking setup. See the factory table on each [provider page](/docs/providers).
+
+## Test the failure path
+
+`"AIOS Mock"` can fail the next call with any error type, so the handling code runs in tests without a provider:
+
+<include lang="al" meta='title="MockError.al"'>samples/errors/MockError.al</include>
+
+See [Mock](/docs/providers/mock) for the other queued outcomes.
