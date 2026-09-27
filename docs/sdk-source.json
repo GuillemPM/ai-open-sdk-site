@@ -1,0 +1,21 @@
+{
+  "$comment": "The AL-AI-Toolkit revision these docs are verified against. Change it only with pnpm docs:api-sync --pin (see docs-harness.md).",
+  "repository": "https://github.com/GuillemPM/AL-AI-Toolkit",
+  "commit": "b37dce22b9bbaab83abfebb6208b787f3215d31f",
+  "commitDate": "2026-09-26T18:27:34+02:00",
+  "commitSubject": "Fix Examples and Mock demo correctness (#17)",
+  "objectPrefix": "AIOS ",
+  "manifest": "docs/public-api.json",
+  "apps": [
+    { "path": "apps/AIOpenSDK.Core", "role": "sdk" },
+    { "path": "apps/AIOpenSDK.ProviderUtils", "role": "sdk" },
+    { "path": "apps/AIOpenSDK.Provider.Anthropic", "role": "sdk" },
+    { "path": "apps/AIOpenSDK.Provider.OpenAI", "role": "sdk" },
+    { "path": "apps/AIOpenSDK.Provider.OpenAICompatible", "role": "sdk" },
+    { "path": "apps/AIOpenSDK.Provider.OpenCodeZen", "role": "sdk" },
+    { "path": "apps/AIOpenSDK.Examples", "role": "examples" }
+  ],
+  "excludedApps": {
+    "apps/AIOpenSDK.Test": "Test-only app. Consumers do not install it, so its objects are not public API."
+  }
+}

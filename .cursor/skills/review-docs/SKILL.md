@@ -11,6 +11,10 @@ description: >-
 Read `docs-harness.md` first. Review from the perspective of an extension
 developer who does not know the SDK implementation.
 
+API accuracy has its own pass: run the `review-api` skill (or confirm its
+report is attached) before this review. This checklist does not re-verify
+signatures.
+
 ## Clarity
 
 - [ ] Title and description match the page
@@ -25,7 +29,7 @@ developer who does not know the SDK implementation.
 - [ ] `meta` title matches filename
 - [ ] Samples are minimal; no secrets or placeholder API keys as plaintext secrets
 - [ ] Prose claims match what the sample shows
-- [ ] No invented SDK APIs
+- [ ] No invented SDK APIs (`pnpm docs:check` passes and the `review-api` report has no blockers)
 
 ## Structure
 
@@ -33,7 +37,9 @@ developer who does not know the SDK implementation.
 - [ ] No orphan `.al` samples (unused) or broken include paths
 - [ ] Concepts do not duplicate full API reference; cross-link instead
 - [ ] Learn vs docs tree choice is appropriate
-- [ ] Folders nested by name (not `"...folder"` extract); `index` not listed in folder `pages`## Consistency
+- [ ] Folders nested by name (not `"...folder"` extract); `index` not listed in folder `pages`
+
+## Consistency
 
 - [ ] Object names match existing docs (`"AIOS Client"`, `"AIOS Tool Set"`, etc.)
 - [ ] Provider pages follow the same shape as existing provider MDX

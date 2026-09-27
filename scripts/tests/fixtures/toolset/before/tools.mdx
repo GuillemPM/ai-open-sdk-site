@@ -76,7 +76,7 @@ Had `MaxSteps` been `1`, the loop would stop after step 1 and the result would i
 | Interface tool | `ToolSet.Add(Tool)` | Reusable single-tool codeunits |
 | Handler pack | `ToolSet.Use(Handler)` | Several tools behind one object ID |
 | Named + event | `ToolSet.Add(Name, Description, Schema)` | Definitions at the call site; execute via `OnBeforeExecuteTool` |
-| Definition object | `ToolSet.Add(Schema.ToolDefinition(...))` | Same as named Add, from a JSON definition |
+| Definition object | `ToolSet.Add(ToolDefinition(...))` | Same as named Add, from a JSON definition |
 
 You can combine interface tools and named tools on the same `"AIOS Tool Set"`. Execution order for a name is: interface tool, then handler (if set), then `OnBeforeExecuteTool`.
 
@@ -92,14 +92,12 @@ Implement `"AIOS Tool"` and add the codeunit to the set.
 
 Implement `"AIOS Tool Handler"` when several tools should share one object ID.
 
-`GetDefinitions` returns a JSON array of `{ name, description, parameters }` objects. Build each entry with `Schema.ToolDefinition(...)` on `"AIOS Schema"`.
+`GetDefinitions` returns a JSON array of `{ name, description, parameters }` objects. Build each entry with `ToolSet.ToolDefinition(...)`.
 
 `ToolSet.Use(Handler)`:
 
 1. Stores the handler for execution
-2. Adds every definition from `GetDefinitions()`
-
-Call `Use` once per tool set. A second call raises an error, so combine tools in one handler or add the rest with `Add`.
+2. Registers every definition from `GetDefinitions()`
 
 <include lang="al" meta='title="MyAppTools.al"'>samples/tools/MyAppTools.al</include>
 
@@ -107,7 +105,7 @@ Call `Use` once per tool set. A second call raises an error, so combine tools in
 
 ## Named tools and OnBeforeExecuteTool
 
-Add a named definition to the tool set and handle execution in an `OnBeforeExecuteTool` subscriber on `"AIOS Tool Set"`. Set `Handled := true` after matching the name.
+Register a definition on the tool set and handle execution in an `OnBeforeExecuteTool` subscriber on `"AIOS Tool Set"`. Set `Handled := true` after matching the name.
 
 <include lang="al" meta='title="AddNamed.al"'>samples/tools/AddNamed.al</include>
 
@@ -152,17 +150,16 @@ Use `GenerateText(Model, Request)` when you want one model call per invocation. 
 
 | Procedure | Behavior |
 |---|---|
-| `Add(Tool)` | Adds an `"AIOS Tool"`. Empty or duplicate names raise an error |
-| `Use(Handler)` | Sets the handler and adds all `GetDefinitions()` entries. Allowed once per tool set |
-| `Add(Name, Description, Parameters)` | Adds a named tool, executed by the handler from `Use` or by `OnBeforeExecuteTool` |
-| `Add(Definition)` | Adds a named tool from a `{ name, description, parameters }` object, such as one built with `Schema.ToolDefinition(...)` |
-| `Execute(Name, Arguments, ResultText)` | Runs the tool and returns whether it succeeded. Unknown names, or named tools with no handler and no subscriber, raise an error |
-| `GetDefinitions()` | Combined definitions for interface and named tools |
-| `Count()` | Number of tools in the set |
-| `HasTool(Name)` | `true` when a tool with that name was added |
-| `ClearTools()` | Removes all tools and the handler so the set can be rebuilt |
-
-`Schema.ToolDefinition(Name, Description, Parameters)` on `"AIOS Schema"` builds one definition object for `GetDefinitions` or `ToolSet.Add(Definition)`.
+| `Add(Tool)` | Registers an `"AIOS Tool"`; duplicate names error |
+| `Use(Handler)` | Sets the handler and registers all `GetDefinitions()` entries |
+| `Add(Name, Description, Parameters)` | Registers a named tool for handler or `OnBeforeExecuteTool` |
+| `Add(Definition)` | Registers from `{ name, description, parameters }` |
+| `ToolDefinition(Name, Description, Parameters)` | Builds one definition object |
+| `Register(Name, Description, Parameters)` | Same registration as named `Add` |
+| `SetHandler(Handler)` | Sets the executor for named tools |
+| `Execute(Name, Arguments, ResultText)` | Runs the tool and returns whether it succeeded |
+| `GetDefinitions()` | Combined definitions for interface + named tools |
+| `Count()` / `HasTool(Name)` | Inspection helpers |
 
 ## Examples
 

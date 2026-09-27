@@ -14,10 +14,10 @@ A custom provider is a separate app that depends on **AI Open SDK** (core) and r
 | `"AIOS Provider"` | Factory surface (`GetName`, bind helpers) matching shipped providers |
 | `"AIOS Chat Format"` | Your HTTP message/tool JSON differs from the built-in formats |
 
-Core already ships reusable formats:
+The SDK already ships reusable formats:
 
-- `"AIOS OpenAI Compatible Format"`
-- `"AIOS Anthropic Format"`
+- `"AIOS Chat Completions Format"` in **AI Open SDK Provider Utils**, for Chat Completions endpoints
+- `"AIOS Anthropic Format"` in **AI Open SDK Anthropic**, for the Anthropic Messages format
 
 Reuse one of those when your endpoint matches that format. Implement `"AIOS Chat Format"` when your endpoint uses a different format.
 

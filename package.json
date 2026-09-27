@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "docs:check": "node scripts/docs-check.mjs"
+    "docs:check": "node scripts/docs-check.mjs && node --test scripts/tests/*.test.mjs",
+    "docs:api-review": "node scripts/api-review.mjs",
+    "docs:api-sync": "node scripts/sdk-api-sync.mjs"
   },
   "dependencies": {
     "@shikijs/magic-move": "4.4.1",

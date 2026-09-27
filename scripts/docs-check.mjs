@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { ApiIndex, apiCheckedFiles, applyExceptions, checkFiles, formatProblem, loadAliases, loadManifest, loadPin } from './lib/public-api.mjs';
 
 const root = process.cwd();
 const contentRoots = ['content/docs', 'content/learn'];
@@ -108,6 +109,21 @@ for (const directory of contentRoots) {
   }
 }
 
+// Public API ownership: every SDK reference must resolve against the manifest
+// generated from the pinned AL-AI-Toolkit commit (docs/sdk-source.json).
+const pin = loadPin(root);
+const manifest = loadManifest(root, pin);
+if (manifest.source?.commit !== pin.commit) {
+  errors.push(
+    `${pin.manifest}: generated from ${manifest.source?.commit}, but docs/sdk-source.json pins ${pin.commit}. ` +
+      'Run pnpm docs:api-sync --sdk <checkout> --write.',
+  );
+}
+const apiReferences = checkFiles(apiCheckedFiles(root), { root, index: new ApiIndex(manifest), aliases: loadAliases(root) });
+const apiProblems = applyExceptions(apiReferences, root);
+for (const reference of apiProblems.errors) errors.push(formatProblem(reference));
+for (const reference of apiProblems.excepted) warnings.push(`${formatProblem(reference)} [policy exception]`);
+
 for (const warning of warnings) console.warn(`warning: ${warning}`);
 if (errors.length) {
   for (const error of errors) console.error(`error: ${error}`);
@@ -115,4 +131,7 @@ if (errors.length) {
   process.exit(1);
 }
 
-console.log(`docs:check passed (${mdxFiles.length} pages, ${sampleFiles.length} samples)`);
+console.log(
+  `docs:check passed (${mdxFiles.length} pages, ${sampleFiles.length} samples, ` +
+    `${apiReferences.length} API references checked against ${pin.commit.slice(0, 12)})`,
+);

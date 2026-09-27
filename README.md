@@ -21,4 +21,6 @@ SDK source: [GuillemPM/AL-AI-Toolkit](https://github.com/GuillemPM/AL-AI-Toolkit
 
 ## Agent workflow
 
-Cursor agents should follow [AGENTS.md](AGENTS.md) (docs-first). Project rules, skills (`write-docs`, `add-doc-page`, `review-docs`), and hooks live under `.cursor/`.
+Cursor agents should follow [AGENTS.md](AGENTS.md) (docs-first). Project rules, skills (`write-docs`, `add-doc-page`, `review-docs`, `review-api`), and hooks live under `.cursor/`.
+
+The docs are checked against the AL-AI-Toolkit commit pinned in `docs/sdk-source.json`. See [docs-harness.md](docs-harness.md) for `pnpm docs:check`, `pnpm docs:api-review`, and `pnpm docs:api-sync`.
