@@ -34,17 +34,17 @@ The client:
 3. Sends the tool results back to the model.
 4. Repeats until the model returns a final answer or `MaxSteps` is reached.
 
-`MaxSteps` values below 1 are treated as 1. Each generation step counts once toward the limit. `GenerateText(Model, Request, ToolSet)` without `MaxSteps` allows 5 steps.
+`MaxSteps` values below 1 are treated as 1. Each generation step counts once toward the limit. `Client.GenerateText(Model, Request, ToolSet)` without `MaxSteps` allows 5 steps.
 
 ### Outcomes
 
 | Condition | Result |
 |---|---|
-| Model returns text (no tool calls) | Success; `Output()` is the final answer |
+| Model returns text (no tool calls) | Success; `Result.Output()` is the final answer |
 | Model requests a registered tool | Tool runs and the loop continues |
 | Model requests an unknown tool name | Generation fails with an invalid-request error |
 | Tool `Execute` returns `false` | The tool result is sent back to the model and the loop continues |
-| Last step still has tool calls | The result reports `HasToolCalls()` and `StoppedAtStepLimit()` as `true` |
+| Last step still has tool calls | The result reports `Result.HasToolCalls()` and `Result.StoppedAtStepLimit()` as `true` |
 
 Structured output and RecRef binding run on the final non-tool-call step only.
 
@@ -97,7 +97,7 @@ Implement `"AIOS Tool Handler"` when several tools should share one object ID.
 `ToolSet.Use(Handler)`:
 
 1. Stores the handler for execution
-2. Adds every definition from `GetDefinitions()`
+2. Adds every definition from `Handler.GetDefinitions()`
 
 Call `Use` once per tool set. A second call raises an error, so combine tools in one handler or add the rest with `Add`.
 
@@ -123,7 +123,7 @@ Set `Handled := true` after handling the name and set `Succeeded` to the tool ou
 
 ## Manual step control
 
-Use `GenerateText(Model, Request)` when you want one model call per invocation. Attach tools with `Request.SetTools(ToolSet)`, then continue the conversation yourself.
+Use `Client.GenerateText(Model, Request)` when you want one model call per invocation. Attach tools with `Request.SetTools(ToolSet)`, then continue the conversation yourself.
 
 <include lang="al" meta='title="ManualContinue.al"'>samples/tools/ManualContinue.al</include>
 
@@ -144,7 +144,7 @@ Use `GenerateText(Model, Request)` when you want one model call per invocation. 
 | `Result.GetToolCalls()` | List of `"AIOS Tool Call"` from that response |
 | `Result.StoppedAtStepLimit()` | Loop ended because `MaxSteps` was reached before a final answer |
 | `Result.GetStepCount()` | Number of generation steps |
-| `Result.GetTotalInputTokens()` / `GetTotalOutputTokens()` | Aggregated usage across steps |
+| `Result.GetTotalInputTokens()` / `Result.GetTotalOutputTokens()` | Aggregated usage across steps |
 
 ## Tool Set reference
 
@@ -166,7 +166,9 @@ Use `GenerateText(Model, Request)` when you want one model call per invocation. 
 
 ## Examples
 
-Toolkit samples in `"AIOS Usage Example"`:
+{/* api-demo: "AIOS Usage Example", "AIOS Toolkit Demo" */}
+
+The toolkit repo ships an Examples app with demo code. It is not part of the SDK: read it for patterns, but do not depend on it from your extension. The demo codeunit `"AIOS Usage Example"` covers each pattern:
 
 {/* api-owner: "AIOS Usage Example" */}
 

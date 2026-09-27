@@ -10,6 +10,11 @@ keep failing `docs:check` for the reasons listed in `scripts/tests/api-check.tes
 - `Register(...)`: not declared on any SDK object
 - `SetHandler(...)`: local to `"AIOS Tool Set"`
 
-`after/` is the corrected page and samples. They must pass.
+`after/` is the corrected page and samples. They must pass. The page has the
+same later edits as the live page when the check started to reject bare calls
+with no owner and undeclared Examples app objects: qualified receivers
+(`Client.GenerateText(...)`, `Result.Output()`, `Handler.GetDefinitions()`)
+and an `api-demo` comment in the Examples section. The Tool Set content is
+unchanged.
 
 Fixtures are frozen. Do not update them when the live page changes.

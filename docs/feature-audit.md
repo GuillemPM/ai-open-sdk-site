@@ -33,7 +33,9 @@ For every procedure, event, enum value, and object the page will name:
       the page will say owns it.
 - [ ] The owning object is public, and its app is one the reader installs
       (Core, Provider Utils, or a provider app). Objects from the Examples app
-      are demo code, not API.
+      are demo code, not API: the check fails on them unless the page
+      declares them with `{/* api-demo: "AIOS X" */}` and presents them as
+      demos.
 - [ ] Each overload you document exists with that number of parameters.
       AL has no optional parameters, so a missing argument is a different
       overload or a mistake.
@@ -71,8 +73,10 @@ needs an anchor at the pinned commit:
       `{/* api-owner: "AIOS X" */}` comment above them.
 - [ ] `pnpm docs:check` passes. It runs the ownership check and its
       regression tests.
-- [ ] `pnpm docs:api-review` has no problems, and each entry under "Not
-      attributed to an owner" was confirmed or qualified.
+- [ ] `pnpm docs:api-review` has no problems. A bare call such as
+      `GenerateText(...)` needs an owner comment or a qualified receiver
+      (`Client.GenerateText(...)`), and every entry under "Opted out with
+      api-owner: none" is confirmed not to be an SDK claim.
 - [ ] An API reviewer ran the protocol in
       [`.cursor/skills/review-api/SKILL.md`](../.cursor/skills/review-api/SKILL.md).
 - [ ] `pnpm build` passes.

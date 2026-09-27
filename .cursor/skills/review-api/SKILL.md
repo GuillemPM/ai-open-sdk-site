@@ -32,10 +32,11 @@ change true for the pinned SDK?** Leave voice, structure, and page flow to
    the report with the review.
 3. **Problems.** Every item under "Problems" is a blocker. Do not accept a
    policy exception for pages under `content/docs` or `content/learn`.
-4. **Unattributed calls.** For each item under "Not attributed to an owner",
-   decide which object the reader will think owns it. If that is not the
-   object listed as public, it is a blocker. Otherwise suggest qualifying the
-   call (`Schema.ToolDefinition(...)`) or adding an `api-owner` comment.
+4. **Opt-outs and demos.** A bare call with no owner in scope is already a
+   problem. For each item under "Opted out with api-owner: none", confirm it
+   is the reader's own code or an AL method, not an SDK claim; otherwise it is
+   a blocker. For each item under "Demo references", confirm the page presents
+   the object as Examples app demo code that consumers do not depend on.
 5. **Claims against source.** For each resolved reference whose prose makes a
    behavior claim (errors, defaults, limits, order, once-only rules), open the
    source anchor and confirm the claim. Find the test in `apps/AIOpenSDK.Test`

@@ -8,8 +8,9 @@
 //   --out <file>                            also write the report to a file
 //
 // Prints a Markdown report: every SDK reference with its owner, signature,
-// and a source anchor at the pinned commit, then the problems and the calls
-// the checker could not attribute to an owner. Exits 1 when a problem exists.
+// and a source anchor at the pinned commit, then the problems, the declared
+// demo references, and the bare calls a page opted out of checking. Exits 1
+// when a problem exists, including a bare call with no owner in scope.
 
 import { execFileSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -144,14 +145,26 @@ function review(files) {
     for (const reference of excepted) print(`- ${reference.file}:${reference.line}: ${reference.problem}. ${reference.reason}`);
   }
 
-  const unowned = references.filter((reference) => reference.kind === 'unowned');
+  const demos = references.filter((reference) => reference.demo && !reference.problem);
+  if (demos.length) {
+    print();
+    print(`## Demo references (${demos.length})`);
+    print();
+    print('Objects from the Examples app, declared with `api-demo`. Confirm the page presents them as demos, not API.');
+    print();
+    for (const reference of demos) {
+      print(`- ${reference.file}:${reference.line}: "${reference.owner}"${reference.member ? `.${reference.member}` : ''}`);
+    }
+  }
+
+  const optedOut = references.filter((reference) => reference.kind === 'unowned' && !reference.problem);
   print();
-  print(`## Not attributed to an owner (${unowned.length})`);
+  print(`## Opted out with api-owner: none (${optedOut.length})`);
   print();
-  print('Bare calls outside an `api-owner` scope are not checked. Confirm each owner by hand, or qualify the call.');
+  print('Bare calls in a section marked `{/* api-owner: none */}` are not checked. Confirm none of them is an SDK claim.');
   print();
-  if (!unowned.length) print('None.');
-  for (const reference of unowned) {
+  if (!optedOut.length) print('None.');
+  for (const reference of optedOut) {
     const owners = index.publicOwners(reference.member);
     print(
       `- ${reference.file}:${reference.line}: \`${reference.text}\`, public on ${

@@ -49,7 +49,7 @@ Use the published App Ids from AppSource or your symbol feed. Install only the p
 ## How a provider plugs in
 
 1. The provider app implements `"AIOS Provider"` and returns `"AIOS Language Model"` (and `"AIOS Image Model"` when supported).
-2. Your code calls `Factory.Model(...)` (or `ImageModel(...)`) and passes the model into `"AIOS Client"`.
+2. Your code calls `Factory.Model(...)` (or `Factory.ImageModel(...)`) and passes the model into `"AIOS Client"`.
 3. API keys use `SecretText` end to end.
 4. Live providers send data only after an administrator approves the provider privacy notice. See [Getting Started](/docs/getting-started#approve-the-provider-and-assign-permissions).
 

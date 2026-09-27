@@ -40,6 +40,7 @@
     "Result": "AIOS Generate Result",
     "ImageResult": "AIOS Generate Image Result",
     "ToolSet": "AIOS Tool Set",
+    "Handler": "AIOS Tool Handler",
     "Schema": "AIOS Schema",
     "Mock": "AIOS Mock",
     "Model": "AIOS Language Model",

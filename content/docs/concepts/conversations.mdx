@@ -21,7 +21,7 @@ What the second call sends:
 
 Rules that keep the history correct:
 
-- **Add the reply yourself.** The client does not add the model reply to the request. Call `AppendAssistantMessage(Result.Output())` after each call you want the model to remember.
+- **Add the reply yourself.** The client does not add the model reply to the request. Call `Request.AppendAssistantMessage(Result.Output())` after each call you want the model to remember.
 - **Each prompt is added once.** `SetPrompt` adds the text as the next user turn. Calling `GenerateText` again without a new `SetPrompt` does not repeat it.
 - **The system message is not a turn.** It is sent first on every call, and the current value is used. Changing it with `SetSystemMessage` applies to the next call.
 - **Options stay on the request.** Temperature, output schema, and the other [request options](/docs/concepts/request-options) apply to every call until you change or clear them.

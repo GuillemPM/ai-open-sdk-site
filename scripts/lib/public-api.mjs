@@ -5,7 +5,8 @@
 // fails when the object does not exist, the member is not declared on that
 // object, the member is not callable by a consumer (local, internal,
 // protected, or on an internal object), or no overload takes that many
-// arguments.
+// arguments. Objects from the Examples app (role "examples") are demos, not
+// API: a page may name them only after declaring them with api-demo.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -46,6 +47,23 @@ const BUILT_INS = {
   interface: new Set(),
   enum: new Set(['ordinals', 'names', 'fromInteger', 'asInteger'].map((name) => name.toLowerCase())),
 };
+
+// AL global methods that a page may call bare without an owner in scope.
+const AL_GLOBAL_METHODS = new Set(
+  [
+    'Clear', 'ClearAll', 'Error', 'Message', 'Confirm', 'StrMenu', 'Format', 'Evaluate', 'StrSubstNo', 'StrLen',
+    'CopyStr', 'SelectStr', 'StrPos', 'LowerCase', 'UpperCase', 'DelChr', 'PadStr', 'ConvertStr', 'IncStr',
+    'Round', 'Abs', 'Power', 'Random', 'Today', 'Time', 'WorkDate', 'CurrentDateTime', 'CreateDateTime', 'CalcDate',
+    'CreateGuid', 'IsNullGuid', 'Commit', 'Sleep', 'GuiAllowed', 'UserId', 'CompanyName', 'GetLastErrorText',
+    'ClearLastError',
+  ].map((name) => name.toLowerCase()),
+);
+
+export const DEMO_PROBLEM = 'is a demo object from the Examples app, not SDK API';
+
+function demoProblem(object) {
+  return `"${object.name}" ${DEMO_PROBLEM}. Consumers do not install that app; name it only on a page that declares {/* api-demo: "${object.name}" */}`;
+}
 
 const OBJECT_KEYWORDS = {
   codeunit: 'codeunit',
@@ -121,6 +139,16 @@ function signature(entry) {
  * record; `problem` is set when the docs would mislead a consumer.
  */
 export function resolveMember(index, ownerName, member, argCount) {
+  const reference = resolveDeclaredMember(index, ownerName, member, argCount);
+  const object = index.object(ownerName);
+  // A wrong member on a demo object stays an error even on an api-demo page.
+  if (object?.access === 'Public' && object.role === 'examples' && !reference.problem) {
+    return { ...reference, demo: true, problem: demoProblem(object) };
+  }
+  return reference;
+}
+
+function resolveDeclaredMember(index, ownerName, member, argCount) {
   const object = index.object(ownerName);
   const reference = { owner: ownerName, member, kind: 'procedure' };
   if (!object) {
@@ -203,6 +231,9 @@ function checkObjectName(index, name, keyword) {
     reference.problem = `"${object.name}" is ${object.type === 'interface' ? 'an' : 'a'} ${object.type}, not ${keyword}`;
   } else if (object.access !== 'Public') {
     reference.problem = `"${object.name}" is ${object.access.toLowerCase()} to its app`;
+  } else if (object.role === 'examples') {
+    reference.demo = true;
+    reference.problem = demoProblem(object);
   }
   return reference;
 }
@@ -343,15 +374,23 @@ const OWNER_TABLE_HEADERS = /^\|\s*(Procedure|Method|Overload)s?\s*\|/i;
 /**
  * Check an MDX page. Inline code spans are read as AL. A bare member such as
  * `Add(Tool)` is resolved against the object named by the closest preceding
- * `{/* api-owner: "AIOS X" *\/}` comment in the same section.
+ * `{/* api-owner: "AIOS X" *\/}` comment in the same section. A bare call with
+ * no owner in scope is an error unless it is an AL global method or the
+ * section opts out with `{/* api-owner: none *\/}`.
  */
 export function checkMdx(source, { index, aliases = {} }) {
   const references = [];
   const lines = source.split('\n');
   const pageAliases = { ...aliases };
   for (const m of source.matchAll(/\{\/\*\s*api-alias:\s*([A-Za-z_]\w*)\s*=\s*"([^"]+)"\s*\*\/\}/g)) pageAliases[m[1]] = m[2];
+  // Demo objects from the Examples app the page names on purpose.
+  const demos = new Set();
+  for (const m of source.matchAll(/\{\/\*\s*api-demo:\s*((?:"[^"]+"\s*,?\s*)+)\*\/\}/g)) {
+    for (const name of m[1].matchAll(/"([^"]+)"/g)) demos.add(name[1].toLowerCase());
+  }
 
   let owner = null;
+  let optedOut = false;
   let fence = null;
   let fenceStart = 0;
   let inFrontmatter = lines[0] === '---';
@@ -379,10 +418,14 @@ export function checkMdx(source, { index, aliases = {} }) {
     }
     if (fence !== null) return;
 
-    if (/^#{1,6}\s/.test(line)) owner = null;
+    if (/^#{1,6}\s/.test(line)) {
+      owner = null;
+      optedOut = false;
+    }
     const annotation = line.match(/\{\/\*\s*api-owner:\s*(?:"([^"]+)"|(none))\s*\*\/\}/);
     if (annotation) {
       owner = annotation[1] ?? null;
+      optedOut = !owner;
       if (owner) {
         const reference = checkObjectName(index, owner);
         references.push({ ...reference, line: lineNumber, annotation: true });
@@ -405,8 +448,11 @@ export function checkMdx(source, { index, aliases = {} }) {
     const firstCell = isTableRow ? line.split('|')[1] ?? '' : '';
 
     // In prose, a quoted object earlier on the line (`"AIOS Schema"` owns
-    // `ToolDefinition(...)`) takes precedence over the section owner.
+    // `ToolDefinition(...)`) takes precedence over the section owner. In a
+    // table, a quoted object in the first cell owns the rest of the row.
     let lineOwner = null;
+    const rowOwner = firstCell.trim().match(/^`"([^"]+)"`$/);
+    if (rowOwner && index.object(rowOwner[1])) lineOwner = rowOwner[1];
     for (const span of line.matchAll(/`([^`]+)`/g)) {
       const code = span[1].trim();
       const quoted = code.match(/^"([^"]+)"$/);
@@ -432,9 +478,17 @@ export function checkMdx(source, { index, aliases = {} }) {
       const spanOwner = lineOwner ?? owner;
       if (!bare) continue;
       if (!spanOwner) {
-        // Not checked: no owner is in scope. api-review lists these so a
-        // reviewer can confirm the owner by hand or add an annotation.
-        if (bare[2] !== undefined) references.push({ kind: 'unowned', member: bare[1], line: lineNumber, text: code });
+        // A bare call with no owner is an unverified API claim. It needs an
+        // owner comment, a qualified receiver, or an explicit opt-out.
+        if (bare[2] === undefined || AL_GLOBAL_METHODS.has(bare[1].toLowerCase())) continue;
+        const reference = { kind: 'unowned', member: bare[1], line: lineNumber, text: code };
+        if (!optedOut) {
+          const owners = index.publicOwners(bare[1]);
+          reference.problem = owners.length
+            ? `${bare[1]} has no owner in scope: add {/* api-owner: "AIOS X" */} above it or qualify the call. It is public on ${owners.map((o) => `"${o}"`).join(', ')}`
+            : `${bare[1]} has no owner in scope and is not public on any SDK object: qualify it with its receiver, or mark the section {/* api-owner: none */} if it is not SDK API`;
+        }
+        references.push(reference);
         continue;
       }
       // In an owner's scope, read the first column of a table (the member
@@ -446,6 +500,10 @@ export function checkMdx(source, { index, aliases = {} }) {
       references.push({ ...resolveMember(index, spanOwner, bare[1], argCount), line: lineNumber, text: code, scoped: true });
     }
   });
+  // References to declared demo objects are allowed; the review still lists them.
+  for (const reference of references) {
+    if (reference.demo && demos.has(reference.owner?.toLowerCase())) delete reference.problem;
+  }
   return references;
 }
 

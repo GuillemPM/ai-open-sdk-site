@@ -64,7 +64,9 @@ The docs are verified against one AL-AI-Toolkit commit, pinned in
 
 1. Verify the pin: `pnpm docs:api-sync --fetch` (or `--sdk <checkout>`).
 2. Run the [feature audit](docs/feature-audit.md) for every API you name.
-3. Put `{/* api-owner: "AIOS X" */}` above procedure, method, and overload tables.
+3. Put `{/* api-owner: "AIOS X" */}` above procedure, method, and overload tables
+   and above lists of bare calls. Qualify any other call (`Client.GenerateText(...)`).
+   Declare Examples app objects with `{/* api-demo: "AIOS X" */}`.
 4. Run `pnpm docs:api-review` and hand the report to an API reviewer using the
    `review-api` skill.
 

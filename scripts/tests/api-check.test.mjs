@@ -1,5 +1,7 @@
 import assert from 'node:assert/strict';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -99,6 +101,67 @@ test('ownership check catches arity, visibility, object type, enum, event, and i
     /"My Tool" implements "AIOS Tool" but does not declare Execute/,
   );
   assert.deepEqual(al('Mine: Codeunit "My Tools";\nbegin\n    Mine.Register(1, 2);\nend;'), [], 'consumer objects are not checked');
+});
+
+test('bare SDK calls outside an owner scope fail', () => {
+  const mdx = (body) => problems('inline.mdx', `---\ntitle: T\ndescription: D\n---\n\n${body}\n`);
+  assertProblem(mdx('Call `GenerateText(Model, Request)` to send it.'), /GenerateText has no owner in scope.*public on "AIOS Client"/);
+  assertProblem(mdx('- `SetMaxRetries(0)`'), /SetMaxRetries has no owner in scope/);
+  assertProblem(mdx('Then call `Register(Tool)`.'), /Register has no owner in scope and is not public on any SDK object/);
+  assertProblem(
+    mdx('{/* api-owner: "AIOS Client" */}\n\n- `GenerateText(Model, Request)`\n\n## Next\n\n- `GenerateText(Model, Request)`'),
+    /^12: GenerateText has no owner in scope/,
+  );
+  assert.deepEqual(mdx('{/* api-owner: "AIOS Client" */}\n\n- `GenerateText(Model, Request)`'), [], 'owner comment');
+  assert.deepEqual(mdx('Call `Client.GenerateText(Model, Request)`.'), [], 'qualified call');
+  assert.deepEqual(mdx('Use `Clear(Request)` to start over.'), [], 'AL global method');
+  assert.deepEqual(mdx('{/* api-owner: none */}\n\nYour own `RegisterTools()` procedure.'), [], 'explicit opt-out');
+  assert.deepEqual(
+    mdx('| Object | Role |\n|---|---|\n| `"AIOS Tool Handler"` | `GetDefinitions()` + `Execute(Name, ...)` |'),
+    [],
+    'a quoted object in the first cell owns the row',
+  );
+  assertProblem(
+    mdx('{/* api-owner: "AIOS Tool Set" */}\n\n| Procedure | Behavior |\n|---|---|\n| `Register(Tool)` | adds a tool |'),
+    /"AIOS Tool Set" has no public member named Register/,
+  );
+});
+
+test('Examples app objects are demos, not SDK API', () => {
+  const mdx = (body) => problems('inline.mdx', `---\ntitle: T\ndescription: D\n---\n\n${body}\n`);
+  const demo = /"AIOS Usage Example" is a demo object from the Examples app/;
+  assert.equal(index.object('AIOS Usage Example').role, 'examples');
+  assert.deepEqual(index.publicOwners('RunTools_UseHandler'), [], 'demo procedures have no public SDK owner');
+  assertProblem(problems('inline.al', 'Demo: Codeunit "AIOS Usage Example";'), demo);
+  assertProblem(mdx('See `"AIOS Usage Example"`.'), demo);
+  assertProblem(mdx('{/* api-owner: "AIOS Usage Example" */}\n\n| Procedure | Pattern |\n|---|---|\n| `RunTools_UseHandler` | x |'), demo);
+  assert.deepEqual(
+    mdx(
+      '{/* api-demo: "AIOS Usage Example" */}\n\nSee `"AIOS Usage Example"`.\n\n' +
+        '{/* api-owner: "AIOS Usage Example" */}\n\n| Procedure | Pattern |\n|---|---|\n| `RunTools_UseHandler` | x |',
+    ),
+    [],
+    'declared demo references pass',
+  );
+  assertProblem(
+    mdx('{/* api-demo: "AIOS Usage Example" */}\n\n{/* api-owner: "AIOS Usage Example" */}\n\n| Procedure | Pattern |\n|---|---|\n| `RunTools_Missing` | x |'),
+    /"AIOS Usage Example" has no public member named RunTools_Missing/,
+  );
+  assertProblem(mdx('{/* api-demo: "AIOS Usage Example" */}\n\nSee `"AIOS Toolkit Demo"`.'), /"AIOS Toolkit Demo" is a demo object/);
+});
+
+test('api-review exits nonzero for an unowned API claim', () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'api-review-'));
+  const page = path.join(directory, 'unowned.mdx');
+  try {
+    fs.writeFileSync(page, '---\ntitle: T\ndescription: D\n---\n\nCall `GenerateText(Model, Request)`.\n');
+    const run = spawnSync(process.execPath, ['scripts/api-review.mjs', page], { cwd: root, encoding: 'utf8' });
+    assert.equal(run.status, 1, run.stdout + run.stderr);
+    assert.match(run.stdout, /## Problems \(1\)/);
+    assert.match(run.stdout, /GenerateText has no owner in scope/);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 });
 
 test('AL reader keeps access modifiers, events, and object access', () => {

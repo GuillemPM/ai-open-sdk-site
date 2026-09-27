@@ -17,10 +17,10 @@ Result := Client.GenerateText(Model, Request);
 | Setting | Attempts |
 |---|---|
 | Not set | Up to 3 (the default of 2 retries) |
-| `SetMaxRetries(0)` | 1, no retries |
-| `SetMaxRetries(N)` | Up to N + 1 |
+| `Request.SetMaxRetries(0)` | 1, no retries |
+| `Request.SetMaxRetries(N)` | Up to N + 1 |
 
-The short overloads, such as `GenerateText(Model, Prompt)`, use the default. `GetMaxRetries` returns the value that applies, and `ClearMaxRetries` restores the default.
+The short overloads, such as `Client.GenerateText(Model, Prompt)`, use the default. `GetMaxRetries` returns the value that applies, and `ClearMaxRetries` restores the default.
 
 Between attempts the client waits a short, growing delay (a fraction of a second, at most two seconds). The time limit from `SetTimeout` applies to each attempt, not to the whole call.
 
@@ -43,7 +43,7 @@ An authentication or invalid-request error will not succeed on a second try, so 
 | Job queue or background task | Default, or higher when the provider throttles often |
 | Tool loop with several steps | Default. Each step has its own retry budget |
 
-Every attempt is a separate model call, so retries count toward `GetStepCount()` and the token totals on the result.
+Every attempt is a separate model call, so retries count toward `Result.GetStepCount()` and the token totals on the result.
 
 ## Image requests
 
@@ -55,4 +55,4 @@ Every attempt is a separate model call, so retries count toward `GetStepCount()`
 
 <include lang="al" meta='title="MockRetry.al"'>samples/retries/MockRetry.al</include>
 
-With `SetFailuresBeforeSuccess(3)` and the same budget, the call raises an error after the third failed attempt.
+With `Mock.SetFailuresBeforeSuccess(3)` and the same budget, the call raises an error after the third failed attempt.

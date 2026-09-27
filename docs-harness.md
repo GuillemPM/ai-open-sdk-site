@@ -82,7 +82,8 @@ Limits of the sync:
   event signatures, enum values, and table fields. It does not resolve
   namespaces, extensions, or `internalsVisibleTo`.
 - The Test app is excluded: consumers do not install it. The Examples app is
-  included so pages can name demo objects, but it is not API.
+  included with the role `examples` so pages can name demo objects, but it is
+  not API (see below).
 
 ### Public API ownership check
 
@@ -98,7 +99,9 @@ samples, and hero snippets against the manifest. It fails when:
 - an enum value, event subscriber, or subscriber parameter does not match
 - a codeunit implementing an SDK interface is missing an interface method
 - a bare SDK call is nested in another call (`ToolSet.Add(ToolDefinition(...))`)
+- a bare call (`GenerateText(...)`) has no owner in scope
 - a procedure, method, or overload table has no owner
+- a page or sample names an Examples app object without declaring it as a demo
 
 Sample fragments often use variables without declaring them. The conventional
 names (`Client`, `Request`, `ToolSet`, `Schema`, ...) map to objects in
@@ -117,9 +120,28 @@ next heading:
 | `Add(Tool)` | ... |
 ```
 
-A quoted object earlier on the same prose line takes precedence. Bare calls
-with no owner in scope are not checked; `pnpm docs:api-review` lists them for
-the reviewer.
+A quoted object earlier on the same prose line takes precedence. In a table, a
+quoted object in the first cell (`"AIOS Tool Handler"`) owns the rest of the
+row.
+
+A bare call with no owner in scope fails, because nothing checks it. Qualify
+it with its receiver (`Client.GenerateText(...)`, using the `apiAliases`
+names) or add an owner comment. AL methods such as `Clear(Request)` are
+allowed. When a section names the reader's own procedures, mark it
+`{/* api-owner: none */}` until the next heading; `pnpm docs:api-review` lists
+those calls so the reviewer can confirm none of them is an SDK claim.
+
+Objects from the Examples app (`"AIOS Usage Example"`, `"AIOS Toolkit Demo"`)
+are demo code that consumers do not install. The check fails on them, in
+samples always and on a page unless the page declares them:
+
+```mdx
+{/* api-demo: "AIOS Usage Example", "AIOS Toolkit Demo" */}
+```
+
+Declared demo references still resolve against the manifest, so a missing demo
+procedure fails, and `pnpm docs:api-review` lists them under "Demo
+references". Say in the prose that the object is demo code.
 
 `apiExceptions` in `docs/docs-policy.json` lists known references to objects
 that are not in the SDK (today only the landing hero). They print as warnings.
@@ -146,7 +168,7 @@ Do not add exceptions for reference pages.
 | Command | What it proves |
 |---|---|
 | `pnpm docs:check` | Frontmatter, includes, sample ownership, navigation, human punctuation, forbidden implementation terms, public API ownership against the pinned manifest, and the regression tests in `scripts/tests/` |
-| `pnpm docs:api-review` | Report for the changed pages: every reference with its signature and source anchor, problems, and calls without an owner |
+| `pnpm docs:api-review` | Report for the changed pages: every reference with its signature and source anchor, problems (exit 1), demo references, and opted-out bare calls |
 | `pnpm docs:api-sync --fetch` | The committed manifest matches the pinned SDK commit |
 | `pnpm build` | The site renders |
 

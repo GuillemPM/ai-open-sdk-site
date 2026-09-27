@@ -16,6 +16,8 @@ Message := Result.Output();
 
 Use an `"AIOS Chat Request"` when the call needs more than a prompt:
 
+{/* api-owner: "AIOS Client" */}
+
 - `GenerateText(Model, System, Prompt)` adds a system instruction.
 - `GenerateText(Model, Request)` uses the prompt and options on the request.
 - `GenerateText(Model, Request, OutputRecRef)` writes structured output to a record.
@@ -42,6 +44,8 @@ To tune the call, see [Request options](/docs/concepts/request-options). For fol
 See [Generation result](/docs/api/generate-result) for the complete result surface.
 
 ## Image generation
+
+{/* api-owner: "AIOS Client" */}
 
 - `GenerateImage(Model, Prompt)`
 - `GenerateImage(Model, Request)`
