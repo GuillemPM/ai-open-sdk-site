@@ -13,10 +13,14 @@ description: Read generated text, usage, and tool-call information.
 | `HasToolCalls()` / `GetToolCalls()` | Tool calls returned by the model |
 | `StoppedAtStepLimit()` | Whether a tool loop stopped before the model returned a final answer |
 | `GetStepCount()` | Number of generation steps |
-| `GetTotalInputTokens()` / `GetTotalOutputTokens()` | Total token usage for the generation |
+| `GetTotalInputTokens()` / `GetTotalOutputTokens()` | Total token usage across every model call in the generation |
+| `GetInputTokens()` / `GetOutputTokens()` | Token usage of the last model call |
+| `GetFinishReason()` | Why the model stopped, as reported by the provider |
+| `GetProviderName()` | Name of the provider that answered, such as `anthropic` |
+| `GetWarnings()` | Options the SDK adjusted or dropped for this provider. See [Request options](/docs/concepts/request-options#read-warnings) |
 | `HttpStatusCode()` | HTTP status returned by the provider |
 
-`Body()` and `Headers()` are available when you need provider response details while diagnosing a failed integration. Token, finish-reason, provider, and warning helpers are also available.
+`Body()` and `Headers()` return the raw provider reply of the last call. Use them while diagnosing an integration, not as a stable contract.
 
 When tools are enabled, inspect `HasToolCalls()` and `StoppedAtStepLimit()` before treating the output as a final answer.
 

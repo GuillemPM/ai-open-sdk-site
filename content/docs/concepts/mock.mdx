@@ -36,3 +36,5 @@ Assert.AreEqual('Hello from mock', Result.Output(), 'Unexpected output');
 Image: `Mock.SetNextImageBase64(...)` then `Client.GenerateImage(Mock.ImageModel(...), ...)`.
 
 For tool-loop tests, `SetNextToolCallThenResponse` queues a tool call followed by a final response. See [Mock provider](/docs/providers/mock) for the available test responses.
+
+To test failure handling, queue an error with `SetNextError` or temporary failures with `SetFailuresBeforeSuccess`. See [Error handling](/docs/concepts/errors#test-the-failure-path) and [Retries](/docs/concepts/retries#test-retries).

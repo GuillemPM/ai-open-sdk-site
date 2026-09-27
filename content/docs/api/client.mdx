@@ -13,13 +13,17 @@ Use `"AIOS Client"` to send prompts to a language or image model. Choose a short
 | `GenerateText(Model, SystemMessage, Prompt)` | `"AIOS Generate Result"` |
 | `GenerateText(Model, Request)` | `"AIOS Generate Result"` |
 | `GenerateText(Model, Request, OutputRecRef)` | `"AIOS Generate Result"` |
+| `GenerateText(Model, Request, ToolSet)` | `"AIOS Generate Result"` |
+| `GenerateText(Model, Request, ToolSet, OutputRecRef)` | `"AIOS Generate Result"` |
 | `GenerateText(Model, Request, ToolSet, MaxSteps)` | `"AIOS Generate Result"` |
 | `GenerateText(Model, Request, ToolSet, MaxSteps, OutputRecRef)` | `"AIOS Generate Result"` |
 | `GenerateImage(Model, Prompt)` | `"AIOS Generate Image Result"` |
 | `GenerateImage(Model, Request)` | `"AIOS Generate Image Result"` |
 
-The client raises an error when generation fails. A successful text call returns `"AIOS Generate Result"`; a successful image call returns `"AIOS Generate Image Result"`.
+The tool overloads without `MaxSteps` allow up to 5 model steps.
+
+The client raises an error when generation fails. A successful text call returns `"AIOS Generate Result"`; a successful image call returns `"AIOS Generate Image Result"`. See [Error handling](/docs/concepts/errors) for the error types and a soft-fail pattern.
 
 For examples and guidance, see [Client API](/docs/concepts/client).
 
-Use the `Request` overload when you want to keep prompts, options, tools, and output schema together. A request can be reused for another prompt, and the `RecRef` overload binds the result to the record passed to that call.
+Use the `Request` overload when you want to keep prompts, [options](/docs/concepts/request-options), [history](/docs/concepts/conversations), [attachments](/docs/concepts/attachments), tools, and output schema together. A request can be reused for another prompt, and the `RecRef` overload binds the result to the record passed to that call.

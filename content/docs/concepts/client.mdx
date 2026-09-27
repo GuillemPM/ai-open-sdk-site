@@ -19,10 +19,13 @@ Use an `"AIOS Chat Request"` when the call needs more than a prompt:
 - `GenerateText(Model, System, Prompt)` adds a system instruction.
 - `GenerateText(Model, Request)` uses the prompt and options on the request.
 - `GenerateText(Model, Request, OutputRecRef)` writes structured output to a record.
-- `GenerateText(Model, Request, ToolSet, MaxSteps)` lets the model use tools before answering.
+- `GenerateText(Model, Request, ToolSet)` lets the model use tools before answering, with up to 5 steps.
+- `GenerateText(Model, Request, ToolSet, MaxSteps)` does the same with your own step limit.
 - `GenerateText(Model, Request, ToolSet, MaxSteps, OutputRecRef)` combines tools with record output.
 
-Returns `"AIOS Generate Result"` and Errors on failure.
+Returns `"AIOS Generate Result"` and raises an error on failure. See [Error handling](/docs/concepts/errors).
+
+To tune the call, see [Request options](/docs/concepts/request-options). For follow-up prompts, see [Conversations](/docs/concepts/conversations).
 
 ### Result accessors
 

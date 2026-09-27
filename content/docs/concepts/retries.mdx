@@ -1,16 +1,58 @@
 ---
 title: Retries
-description: Configure retries for temporary provider failures.
+description: Choose how many times a call retries temporary provider failures, and test it without a provider.
 ---
 
-The SDK can retry temporary provider failures before returning an error. Configure the limit on the request:
+A provider can throttle or time out even when your request is correct. The client retries those temporary failures before it raises an error, so a single slow response does not break the page or job.
 
-- `GetMaxRetries` / `SetMaxRetries` (default **2**)
+## Set the retry budget
 
-Retries cover temporary failures such as:
+Set the number of extra attempts on the request:
 
-- Rate limit
-- Timeout
-- Provider unavailable
+```al
+Request.SetMaxRetries(1);
+Result := Client.GenerateText(Model, Request);
+```
 
-The default is suitable for most calls. Lower it for interactive pages where a quick error is preferable, or raise it for background jobs where a temporary provider failure should be tolerated.
+| Setting | Attempts |
+|---|---|
+| Not set | Up to 3 (the default of 2 retries) |
+| `SetMaxRetries(0)` | 1, no retries |
+| `SetMaxRetries(N)` | Up to N + 1 |
+
+The short overloads, such as `GenerateText(Model, Prompt)`, use the default. `GetMaxRetries` returns the value that applies, and `ClearMaxRetries` restores the default.
+
+Between attempts the client waits a short, growing delay (a fraction of a second, at most two seconds). The time limit from `SetTimeout` applies to each attempt, not to the whole call.
+
+## What is retried
+
+| Error type | Retried |
+|---|---|
+| `RateLimited` | Yes |
+| `Timeout` | Yes |
+| `ProviderUnavailable` | Yes |
+| Every other type | No, the error is raised at once |
+
+An authentication or invalid-request error will not succeed on a second try, so the client does not spend attempts on it. See [Error handling](/docs/concepts/errors) for the full list.
+
+## Choose a value
+
+| Where the call runs | Suggestion |
+|---|---|
+| Interactive page, user is waiting | `0` or `1`, then show a soft-fail message |
+| Job queue or background task | Default, or higher when the provider throttles often |
+| Tool loop with several steps | Default. Each step has its own retry budget |
+
+Every attempt is a separate model call, so retries count toward `GetStepCount()` and the token totals on the result.
+
+## Image requests
+
+`"AIOS Image Request"` has the same `SetMaxRetries` and `GetMaxRetries` procedures, with the same default and the same retried error types.
+
+## Test retries
+
+`"AIOS Mock"` can fail a set number of calls with `RateLimited` and then succeed. Call `SetNextResponse` first, because it resets the queued failures:
+
+<include lang="al" meta='title="MockRetry.al"'>samples/retries/MockRetry.al</include>
+
+With `SetFailuresBeforeSuccess(3)` and the same budget, the call raises an error after the third failed attempt.

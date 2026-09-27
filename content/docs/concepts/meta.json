@@ -2,9 +2,13 @@
   "title": "Concepts",
   "pages": [
     "client",
+    "request-options",
+    "conversations",
     "structured-output",
     "tools",
-    "mock",
-    "retries"
+    "attachments",
+    "errors",
+    "retries",
+    "mock"
   ]
 }

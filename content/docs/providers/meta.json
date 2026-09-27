@@ -4,6 +4,7 @@
     "anthropic",
     "openai",
     "opencode-zen",
+    "openai-compatible",
     "mock",
     "custom"
   ]

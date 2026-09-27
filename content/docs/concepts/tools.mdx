@@ -34,7 +34,7 @@ The client:
 3. Sends the tool results back to the model.
 4. Repeats until the model returns a final answer or `MaxSteps` is reached.
 
-`MaxSteps` values below 1 are treated as 1. Each generation step counts once toward the limit.
+`MaxSteps` values below 1 are treated as 1. Each generation step counts once toward the limit. `GenerateText(Model, Request, ToolSet)` without `MaxSteps` allows 5 steps.
 
 ### Outcomes
 

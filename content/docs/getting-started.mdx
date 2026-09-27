@@ -101,6 +101,25 @@ Example `app.json` fragment for Anthropic:
 
 App Ids match the published toolkit packages. Prefer the Ids from your symbol feed or the release you installed if they differ.
 
+## Approve the provider and assign permissions
+
+Two setup steps in Business Central stop the first call from failing. Do them once per company before you call a live provider.
+
+1. **Approve the privacy notice.** Each provider app registers a privacy notice, because it sends data outside Business Central. Open **Privacy Notices Status**, find the provider (for example **AI Open SDK Anthropic**), and agree to it. Until then, calls to that provider fail with an `InvalidRequest` error. `"AIOS Mock"` needs no approval. To check the approval from AL, see [Error handling](/docs/concepts/errors#privacy-notice-not-approved).
+2. **Assign permissions.** Users who run your AI features need the SDK permission sets for the provider they call. Each provider set already includes core:
+
+   | Provider | Assignable permission set |
+   |---|---|
+   | Anthropic | **AIOS Anthropic User** |
+   | OpenAI | **AIOS OpenAI User** |
+   | OpenCode Zen | **AIOS OCZen User** |
+   | OpenAI Compatible | **AIOS Compatible User** |
+   | Mock only (tests) | **AIOS User Mock** |
+
+To give users one permission set for your whole feature, include the non-assignable object sets in your own. For OpenAI, OpenCode Zen, and OpenAI Compatible, also include **AIOS ProvUtils Objects**:
+
+<include lang="al" meta='title="MyAppUser.al"'>samples/getting-started/MyAppUser.al</include>
+
 ## First call
 
 Load the API key into `SecretText`, bind a model from the provider factory, and call `"AIOS Client"`:
@@ -133,6 +152,8 @@ Keep API keys as `SecretText` end to end (hidden in the debugger; HTTP headers u
 |---|---|
 | Structured JSON | [Structured output](/docs/concepts/structured-output) |
 | Tool calling | [Tools](/docs/concepts/tools) |
+| Temperature, length, reasoning | [Request options](/docs/concepts/request-options) |
+| Handle failures | [Error handling](/docs/concepts/errors) |
 | Unit tests without keys | [Mock](/docs/concepts/mock) |
 | Provider setup | [Providers](/docs/providers) |
 

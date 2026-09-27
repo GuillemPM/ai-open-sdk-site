@@ -1,0 +1,71 @@
+---
+title: OpenAI Compatible
+description: Call any Chat Completions endpoint, such as a self-hosted model or a third-party gateway, by base URL.
+---
+
+**AI Open SDK OpenAI Compatible** is a Business Central app that depends on **AI Open SDK** (core) and exposes the `"AIOS OpenAI Compatible"` factory. Use it for any service that accepts OpenAI Chat Completions requests: self-hosted models, inference gateways, and hosted providers without a dedicated app.
+
+| | |
+|---|---|
+| App name | AI Open SDK OpenAI Compatible |
+| Factory | `"AIOS OpenAI Compatible"` |
+| Provider id | `openai-compatible`, or the name you set with `SetName` |
+| Text | Yes |
+| Image | No |
+| Default base URL | None. You always pass one |
+| Privacy notice | AI Open SDK OpenAI Compatible |
+
+## Dependencies
+
+Your extension depends on:
+
+1. **AI Open SDK** (core)
+2. **AI Open SDK OpenAI Compatible**
+
+The provider app brings **AI Open SDK Provider Utils** with it, so install that app too, but you do not list it in your `app.json`.
+
+Before the first live call, an administrator must agree to the **AI Open SDK OpenAI Compatible** notice on the **Privacy Notices Status** page. One approval covers every base URL you call through this app. See [Error handling](/docs/concepts/errors#privacy-notice-not-approved).
+
+## Generate text
+
+Pass the model id, the key, and the base URL in one call:
+
+<include lang="al" meta='title="GenerateText.al"'>samples/openai-compatible/GenerateText.al</include>
+
+The base URL includes the API version path, usually ending in `/v1`. The model id is whatever the endpoint expects.
+
+## Configure once, then bind
+
+When the key and URL come from a setup table, configure the factory, then bind. `BindLanguageModel` returns `false` instead of raising an error when something is missing, which suits a setup check:
+
+<include lang="al" meta='title="NamedProvider.al"'>samples/openai-compatible/NamedProvider.al</include>
+
+`SetName` only changes the name reported by `Result.GetProviderName()`. Use it to tell endpoints apart in logs.
+
+## Factory API
+
+| Procedure | Behavior |
+|---|---|
+| `Model(ModelId, KeyValue, Url)` | Sets the key and base URL, then returns `"AIOS Language Model"` |
+| `Model(ModelId)` | Returns a model using `SetApiKey` and `SetBaseUrl` |
+| `SetApiKey(KeyValue)` | Stores the API key as `SecretText` |
+| `SetBaseUrl(Url)` | Sets the base URL. Required |
+| `SetName(Name)` | Sets the provider name reported on results |
+| `GetName()` | Returns the name, `openai-compatible` by default |
+| `BindLanguageModel(ModelId, BoundModel)` | Soft-bind; returns `false` when the model id, key, or base URL is missing |
+
+`Model` raises an error when the model id, key, or base URL is empty.
+
+## Endpoint differences
+
+Compatible services do not all support the same features. Before you depend on one of these, test it against your endpoint:
+
+- **Structured output and tools** need a model that supports JSON output and tool calls.
+- **Reasoning** is limited to low, medium, and high. See [Request options](/docs/concepts/request-options#reasoning).
+- **Attachments** other than images and text depend on the endpoint. See [Attachments](/docs/concepts/attachments).
+
+For OpenAI itself use [OpenAI](/docs/providers/openai), and for the OpenCode Zen gateway use [OpenCode Zen](/docs/providers/opencode-zen). Those apps carry the right defaults.
+
+## Keys
+
+Load the key into `SecretText` from Isolated Storage or a setup table. It is sent as a bearer token and never shown in the debugger.

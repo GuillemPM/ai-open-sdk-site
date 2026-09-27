@@ -12,7 +12,7 @@ description: Claude models through the AI Open SDK Anthropic extension.
 | Provider id | `anthropic` |
 | Text | Yes |
 | Image | No |
-| Default API | `https://api.anthropic.com` |
+| Default base URL | `https://api.anthropic.com/v1` |
 | Default `anthropic-version` | `2023-06-01` |
 
 ## Dependencies
@@ -21,6 +21,8 @@ Your extension depends on:
 
 1. **AI Open SDK** (core)
 2. **AI Open SDK Anthropic**
+
+Before the first call, an administrator must agree to the **AI Open SDK Anthropic** notice on the **Privacy Notices Status** page, and users need the **AIOS Anthropic User** permission set. See [Getting Started](/docs/getting-started#approve-the-provider-and-assign-permissions).
 
 ## Generate text
 
@@ -38,6 +40,7 @@ With a system message:
 | `Model(ModelId)` | Returns a model using a key previously set with `SetApiKey` |
 | `SetApiKey(KeyValue)` | Stores the Anthropic API key as `SecretText` |
 | `SetApiVersion(Version)` | Overrides the `anthropic-version` header (default `2023-06-01`) |
+| `SetBaseUrl(Url)` | Overrides the API base (default `https://api.anthropic.com/v1`), for example for a proxy |
 | `GetName()` | Returns `anthropic` |
 | `BindLanguageModel(ModelId, BoundModel)` | Soft-bind; returns `false` when model id or key is missing |
 

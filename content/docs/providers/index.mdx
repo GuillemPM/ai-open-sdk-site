@@ -51,6 +51,7 @@ Use the published App Ids from AppSource or your symbol feed. Install only the p
 1. The provider app implements `"AIOS Provider"` and returns `"AIOS Language Model"` (and `"AIOS Image Model"` when supported).
 2. Your code calls `Factory.Model(...)` (or `ImageModel(...)`) and passes the model into `"AIOS Client"`.
 3. API keys use `SecretText` end to end.
+4. Live providers send data only after an administrator approves the provider privacy notice. See [Getting Started](/docs/getting-started#approve-the-provider-and-assign-permissions).
 
 <include lang="al" meta='title="PlugIn.al"'>samples/index/PlugIn.al</include>
 
@@ -59,7 +60,6 @@ Use the published App Ids from AppSource or your symbol feed. Install only the p
 - [Anthropic](/docs/providers/anthropic)
 - [OpenAI](/docs/providers/openai)
 - [OpenCode Zen](/docs/providers/opencode-zen)
+- [OpenAI Compatible](/docs/providers/openai-compatible)
 - [Mock](/docs/providers/mock)
 - [Custom providers](/docs/providers/custom)
-
-`"AIOS OpenAI Compatible"` is also available for any Chat Completions base URL.
